@@ -3,7 +3,7 @@ import styles from "../sidebar.module.css";
 
 export default function Sidebar() {
   return (
-    <aside className={styles.sidebar}>
+    <div className={styles.sidebar}>
       <div className={styles.logoArea}>
         <div className={styles.logoIcon}>⌂</div>
 
@@ -13,7 +13,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <nav className={styles.menu}>
+      <div className={styles.menu}>
         <NavLink
           to="/"
           className={({ isActive }) =>
@@ -23,16 +23,64 @@ export default function Sidebar() {
           <span>⌂</span>
           Home
         </NavLink>
-      </nav>
+      </div>
+
+      <div className={styles.menu}>
+        <NavLink
+          to="/inquilinos"
+          className={({ isActive }) =>
+            isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
+          }
+        >
+          <span>⌂</span>
+          Inquilinos
+        </NavLink>
+      </div>
+
+      <div className={styles.menu}>
+        <NavLink
+          to="/cobrancas"
+          className={({ isActive }) =>
+            isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
+          }
+        >
+          <span>⌂</span>
+          Cobranças
+        </NavLink>
+      </div>
+
+      <div className={styles.menu}>
+        <NavLink
+          to="/contratos"
+          className={({ isActive }) =>
+            isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
+          }
+        >
+          <span>⌂</span>
+          Contratos
+        </NavLink>
+      </div>
+
+      <div className={styles.menu}>
+        <NavLink
+          to="/configuracoes"
+          className={({ isActive }) =>
+            isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
+          }
+        >
+          <span>⌂</span>
+          Configurações
+        </NavLink>
+      </div>
 
       <div className={styles.userArea}>
-        <div className={styles.avatar}>M</div>
+        <div className={styles.avatarUser}>M</div>
 
         <div className={styles.userInfo}>
           <strong>Murilo</strong>
           <span>Administrador</span>
         </div>
       </div>
-    </aside>
+    </div>
   );
 }
