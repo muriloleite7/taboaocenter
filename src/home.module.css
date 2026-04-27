@@ -3,7 +3,35 @@
   color: #111827;
 }
 
-.home p {
+.subtituloHome {
   color: #64748b;
   margin-top: 6px;
+}
+
+.headerHome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.novoInquilino {
+  background-color: #3b82f6;
+  color: white;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.cardsHome {
+  display: flex;
+  gap: 40px;
+  margin-top: 50px;
+}
+
+.tituloCards {
+  font-size: 28px;
+  margin-top: 70px;
+  margin-bottom: 28px;
 }

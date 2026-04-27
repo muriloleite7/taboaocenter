@@ -6,6 +6,7 @@ export default function Sidebar() {
     <div className={styles.sidebar}>
       <div className={styles.logoArea}>
         <div className={styles.logoIcon}>⌂</div>
+        {/* <svg preserveAspectRatio="xMidYMid meet" data-bbox="7.767 51.693 183.51 85.375" viewBox="7.767 51.693 183.51 85.375" height="200" width="200" xmlns="http://www.w3.org/2000/svg" data-type="color" role="img" aria-label="Página inicial">…</svg> */}
 
         <div>
           <h2>Taboão Center</h2>
