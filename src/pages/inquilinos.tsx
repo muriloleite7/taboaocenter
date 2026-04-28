@@ -9,7 +9,7 @@ export default function Inquilinos() {
       cpf: "123.456.789-00",
       telefone: "(11) 98765-4321",
       imovel: "Apto 101",
-      bairro: "Centro",
+      endereco: "Av José Lopes de Oliveira",
       aluguel: "R$ 1.500,00",
       vencimento: "10/05/2026",
       status: "Adimplente",
@@ -20,7 +20,7 @@ export default function Inquilinos() {
       cpf: "987.654.321-00",
       telefone: "(11) 97654-3210",
       imovel: "Casa 02",
-      bairro: "Parque Assunção",
+      endereco: "Jd. São Paulo",
       aluguel: "R$ 1.800,00",
       vencimento: "15/05/2026",
       status: "Com pendência",
@@ -31,7 +31,7 @@ export default function Inquilinos() {
       cpf: "456.789.123-00",
       telefone: "(11) 99876-5432",
       imovel: "Apto 203",
-      bairro: "Vila Sônia",
+      endereco: "Rua das Flores",
       aluguel: "R$ 1.600,00",
       vencimento: "10/05/2026",
       status: "Adimplente",
@@ -42,7 +42,7 @@ export default function Inquilinos() {
       cpf: "321.654.987-00",
       telefone: "(11) 96987-6543",
       imovel: "Casa 05",
-      bairro: "Jd. Roberto",
+      endereco: "Jd. Roberto",
       aluguel: "R$ 1.700,00",
       vencimento: "08/05/2026",
       status: "Com pendência",
@@ -127,9 +127,9 @@ export default function Inquilinos() {
 
       <div className={styles.tabelaContainer}>
         <table className={styles.tabelaInquilinos}>
-          <thead>
-            <tr>
-              <th>Nome</th>
+          <thead> {/* = Cabeçalho da tabela, onde os títulos das colunas são definidos */}
+            <tr> {/* = Linha do cabeçalho, onde cada título de coluna é definido */}
+              <th>Nome</th> {/* = Título da coluna "Nome", onde o nome do inquilino será exibido */}
               <th>CPF</th>
               <th>Telefone</th>
               <th>Imóvel</th>
@@ -140,12 +140,12 @@ export default function Inquilinos() {
             </tr>
           </thead>
 
-          <tbody>
+          <tbody> {/* = Corpo da tabela, onde os dados dos inquilinos são renderizados dinamicamente */}
             {inquilinos.map((inquilino, index) => (
               <tr key={index}>
-                <td>
+                <td>  {/* = Célula da tabela onde as informações do inquilino são exibidas, incluindo avatar, nome e email */}
                   <div className={styles.infoInquilino}>
-                    <div className={styles.avatarInquilino}>
+                    <div className={styles.avatarInquilino}> {/* = Avatar do inquilino, onde as iniciais do nome são exibidas */}
                       {inquilino.nome
                         .split(" ")
                         .map((parteNome) => parteNome[0])
@@ -166,7 +166,7 @@ export default function Inquilinos() {
                 <td>
                   <div className={styles.infoImovel}>
                     <strong>{inquilino.imovel}</strong>
-                    <span>{inquilino.bairro}</span>
+                    <span>{inquilino.endereco}</span>
                   </div>
                 </td>
 
