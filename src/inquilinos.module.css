@@ -31,3 +31,245 @@
   gap: 40px;
   margin-top: 90px;
 }
+
+.filtrosInquilinos {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 22px;
+  margin-top: 26px;
+
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.searchBox {
+  width: 360px;
+  height: 46px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+}
+
+.searchIcon {
+  color: #64748b;
+  font-size: 18px;
+}
+
+.searchInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  color: #0f172a;
+  font-size: 14px;
+  background: transparent;
+}
+
+.searchInput::placeholder {
+  color: #8a94a6;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filterGroup label {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.selectFilter {
+  width: 170px;
+  height: 46px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  padding: 0 12px;
+  outline: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.moreFilters,
+.exportButton {
+  height: 46px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.moreFilters:hover,
+.exportButton:hover {
+  background-color: #f8fafc;
+}
+
+.exportButton {
+  margin-left: auto;
+}
+
+.tabelaContainer {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  margin-top: 26px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.tabelaInquilinos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabelaInquilinos thead {
+  background-color: #f8fafc;
+}
+
+.tabelaInquilinos th {
+  text-align: left;
+  padding: 18px 22px;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 700;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tabelaInquilinos td {
+  padding: 18px 22px;
+  font-size: 14px;
+  color: #0f172a;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tabelaInquilinos tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.infoInquilino {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarInquilino {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: #eef2ff;
+  color: #4f46e5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.infoInquilino strong,
+.infoImovel strong {
+  display: block;
+  font-size: 14px;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.infoInquilino span,
+.infoImovel span {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.statusAdimplente {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background-color: #dcfce7;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.statusPendente {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background-color: #ffedd5;
+  color: #c2410c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.acoesTabela {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.acoesTabela button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.acoesTabela button:hover {
+  background-color: #f1f5f9;
+}
+
+.rodapeTabela {
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rodapeTabela span {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.paginacao {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.paginacao button {
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.paginacao button:hover {
+  background-color: #f1f5f9;
+}
+
+.paginaAtiva {
+  background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
