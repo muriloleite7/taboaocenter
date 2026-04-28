@@ -6,7 +6,7 @@ export default function Home() {
     <div className={styles.home}>
       <div className={styles.headerHome}>
         <div>
-          <h1>Olá, Murilo!</h1>
+          <h1 className={styles.tituloHome}>Olá, Murilo!</h1>
           <p className={styles.subtituloHome}>Veja o resumo da imobiliária hoje.</p>
         </div>
 

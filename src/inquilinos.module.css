@@ -1,17 +1,18 @@
-.tituloHome {
+.headerInquilinos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.tituloInquilinos {
   font-size: 32px;
   color: #111827;
 }
 
-.subtituloHome {
+.subtituloInquilinos {
   color: #64748b;
   margin-top: 6px;
-}
-
-.headerHome {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .novoInquilino {
@@ -25,14 +26,8 @@
   min-width: 200px;
 }
 
-.cardsHome {
+.cardsInquilinos {
   display: flex;
   gap: 40px;
-  margin-top: 50px;
-}
-
-.tituloCards {
-  font-size: 28px;
-  margin-top: 70px;
-  margin-bottom: 28px;
+  margin-top: 90px;
 }
