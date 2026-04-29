@@ -1,21 +1,21 @@
-.headerCobrancas {
+.headerContratos {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
 }
 
-.tituloCobrancas {
+.tituloContratos {
   font-size: 32px;
   color: #111827;
 }
 
-.subtituloCobrancas {
+.subtituloContratos {
   color: #64748b;
   margin-top: 6px;
 }
 
-.lancarDespesa {
+.novoContrato {
   background: linear-gradient(135deg, #4f46e5, #6366f1);
   color: white;
   padding: 14px 32px;
@@ -26,13 +26,13 @@
   min-width: 200px;
 }
 
-.cardsCobrancas {
+.cardsContratos {
   display: flex;
   gap: 40px;
   margin-top: 90px;
 }
 
-.filtrosCobrancas {
+.filtrosContratos {
   width: 100%;
   background-color: #ffffff;
   border: 1px solid #e5e7eb;
@@ -112,14 +112,11 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  margin-left: auto;
 }
 
 .exportButton:hover {
   background-color: #f8fafc;
-}
-
-.exportButton {
-  margin-left: auto;
 }
 
 .tabelaContainer {
@@ -131,16 +128,16 @@
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
 }
 
-.tabelaCobrancas {
+.tabelaContratos {
   width: 100%;
   border-collapse: collapse;
 }
 
-.tabelaCobrancas thead {
+.tabelaContratos thead {
   background-color: #f8fafc;
 }
 
-.tabelaCobrancas th {
+.tabelaContratos th {
   text-align: left;
   padding: 18px 22px;
   font-size: 14px;
@@ -149,7 +146,7 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.tabelaCobrancas td {
+.tabelaContratos td {
   padding: 18px 22px;
   font-size: 14px;
   color: #0f172a;
@@ -157,17 +154,17 @@
   white-space: nowrap;
 }
 
-.tabelaCobrancas tbody tr:hover {
+.tabelaContratos tbody tr:hover {
   background-color: #f8fafc;
 }
 
-.infoCobranca {
+.infoContrato {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.avatarCobranca {
+.avatarContrato {
   width: 42px;
   height: 42px;
   border-radius: 50%;
@@ -179,20 +176,22 @@
   font-weight: 700;
 }
 
-.infoCobranca strong {
+.infoContrato strong,
+.infoImovel strong {
   display: block;
   font-size: 14px;
   color: #0f172a;
   margin-bottom: 4px;
 }
 
-.infoCobranca span {
+.infoContrato span,
+.infoImovel span {
   display: block;
   font-size: 13px;
   color: #64748b;
 }
 
-.statusPago {
+.statusAtivo {
   display: inline-block;
   padding: 7px 12px;
   border-radius: 999px;
@@ -202,7 +201,7 @@
   font-weight: 700;
 }
 
-.statusPendente {
+.statusVenceBreve {
   display: inline-block;
   padding: 7px 12px;
   border-radius: 999px;
@@ -212,12 +211,22 @@
   font-weight: 700;
 }
 
-.statusAtrasado {
+.statusRenovacao {
   display: inline-block;
   padding: 7px 12px;
   border-radius: 999px;
-  background-color: #fee2e2;
-  color: #b91c1c;
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.statusEncerrado {
+  display: inline-block;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background-color: #e5e7eb;
+  color: #374151;
   font-size: 13px;
   font-weight: 700;
 }
@@ -279,14 +288,4 @@
   background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
   color: #ffffff !important;
   border: none !important;
-}
-
-.statusDespesas {
-  display: inline-block;
-  padding: 7px 12px;
-  border-radius: 999px;
-  background-color: #e0f2fe;
-  color: #0369a1;
-  font-size: 13px;
-  font-weight: 700;
 }

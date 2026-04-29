@@ -48,12 +48,12 @@ export default function Cobrancas() {
       cpf: "321.654.987-00",
       referencia: "Maio/2026",
       aluguel: "R$ 1.700,00",
-      agua: "R$ 89,00",
-      luz: "R$ 121,00",
-      multa: "R$ 0,00",
-      total: "R$ 1.910,00",
+      agua: "—",
+      luz: "—",
+      multa: "—",
+      total: "Aguardando despesas",
       vencimento: "15/05/2026",
-      status: "Pendente",
+      status: "Despesas pendentes",
     },
   ];
 
@@ -115,6 +115,7 @@ export default function Cobrancas() {
             <option>Pendente</option>
             <option>Paga</option>
             <option>Atrasada</option>
+            <option>Despesas pendentes</option>
           </select>
         </div>
 
@@ -186,8 +187,10 @@ export default function Cobrancas() {
                       cobranca.status === "Paga"
                         ? styles.statusPago
                         : cobranca.status === "Atrasada"
-                        ? styles.statusAtrasado
-                        : styles.statusPendente
+                          ? styles.statusAtrasado
+                          : cobranca.status === "Despesas pendentes"
+                            ? styles.statusDespesas
+                            : styles.statusPendente
                     }
                   >
                     {cobranca.status}
@@ -197,7 +200,7 @@ export default function Cobrancas() {
                 <td>
                   <div className={styles.acoesTabela}>
                     <button title="Ver detalhes">👁</button>
-                    <button title="Editar">✎</button>
+                    <button title="Editar valores">✎</button>
                     <button title="Mais opções">⋮</button>
                   </div>
                 </td>
