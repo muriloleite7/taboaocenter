@@ -1,5 +1,5 @@
-import Card from '../components/cards';
-import styles from '../cobrancas.module.css';
+import Card from "../components/cards";
+import styles from "../cobrancas.module.css";
 
 export default function Cobrancas() {
   const cobrancas = [
@@ -11,8 +11,9 @@ export default function Cobrancas() {
       aluguel: "R$ 1.500,00",
       agua: "R$ 85,00",
       luz: "R$ 130,00",
+      iptu: "R$ 95,00",
       multa: "R$ 0,00",
-      total: "R$ 1.715,00",
+      total: "R$ 1.810,00",
       vencimento: "10/05/2026",
       status: "Pendente",
     },
@@ -24,8 +25,9 @@ export default function Cobrancas() {
       aluguel: "R$ 1.800,00",
       agua: "R$ 92,00",
       luz: "R$ 145,00",
+      iptu: "R$ 110,00",
       multa: "R$ 36,00",
-      total: "R$ 2.073,00",
+      total: "R$ 2.183,00",
       vencimento: "08/05/2026",
       status: "Atrasada",
     },
@@ -37,8 +39,9 @@ export default function Cobrancas() {
       aluguel: "R$ 1.600,00",
       agua: "R$ 78,00",
       luz: "R$ 118,00",
+      iptu: "R$ 90,00",
       multa: "R$ 0,00",
-      total: "R$ 1.796,00",
+      total: "R$ 1.886,00",
       vencimento: "12/05/2026",
       status: "Paga",
     },
@@ -50,6 +53,7 @@ export default function Cobrancas() {
       aluguel: "R$ 1.700,00",
       agua: "—",
       luz: "—",
+      iptu: "—",
       multa: "—",
       total: "Aguardando despesas",
       vencimento: "15/05/2026",
@@ -92,7 +96,7 @@ export default function Cobrancas() {
         <Card
           title="Despesas a lançar"
           value={15}
-          description="Água e luz pendentes"
+          description="Água, luz e IPTU pendentes"
         />
       </div>
 
@@ -129,9 +133,7 @@ export default function Cobrancas() {
           </select>
         </div>
 
-        <button className={styles.exportButton}>
-          ⇩ Exportar
-        </button>
+        <button className={styles.exportButton}>⇩ Exportar</button>
       </div>
 
       <div className={styles.tabelaContainer}>
@@ -144,6 +146,7 @@ export default function Cobrancas() {
               <th>Aluguel</th>
               <th>Água</th>
               <th>Luz</th>
+              <th>IPTU</th>
               <th>Multa</th>
               <th>Total</th>
               <th>Vencimento</th>
@@ -177,8 +180,11 @@ export default function Cobrancas() {
                 <td>{cobranca.aluguel}</td>
                 <td>{cobranca.agua}</td>
                 <td>{cobranca.luz}</td>
+                <td>{cobranca.iptu}</td>
                 <td>{cobranca.multa}</td>
-                <td>{cobranca.total}</td>
+                <td>
+                  <span className={styles.valorTotal}>{cobranca.total}</span>
+                </td>
                 <td>{cobranca.vencimento}</td>
 
                 <td>
@@ -193,7 +199,7 @@ export default function Cobrancas() {
                             : styles.statusPendente
                     }
                   >
-                    {cobranca.status}
+                    <span className={styles.statusText}>{cobranca.status}</span>
                   </span>
                 </td>
 

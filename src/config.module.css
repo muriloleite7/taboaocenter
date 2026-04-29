@@ -1,0 +1,196 @@
+.headerConfiguracoes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 38px;
+}
+
+.tituloConfiguracoes {
+  font-size: 32px;
+  color: #111827;
+}
+
+.subtituloConfiguracoes {
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.salvarButton {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: white;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  min-width: 200px;
+}
+
+.configGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 26px;
+}
+
+.configCard {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 26px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.configCard h2 {
+  font-size: 20px;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.cardDescription {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 24px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.formGroup label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  outline: none;
+  color: #0f172a;
+  background-color: #ffffff;
+}
+
+.formGroup textarea {
+  min-height: 105px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-top: 14px;
+  margin-top: 10px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.switchRow strong {
+  display: block;
+  font-size: 14px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.switchRow span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  display: none;
+}
+
+.switch span {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #cbd5e1;
+  border-radius: 999px;
+  transition: 0.2s;
+}
+
+.switch span::before {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: 3px;
+  top: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.2s;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+}
+
+.switch input:checked + span {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+}
+
+.switch input:checked + span::before {
+  transform: translateX(22px);
+}
+
+.configCardFull {
+  grid-column: 1 / -1;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 26px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.configCardFull h2 {
+  font-size: 20px;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.preferenceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.preferenceRow:first-of-type {
+  margin-top: 10px;
+}
+
+.preferenceRow strong {
+  display: block;
+  font-size: 14px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.preferenceRow span {
+  font-size: 13px;
+  color: #64748b;
+}
