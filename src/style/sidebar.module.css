@@ -107,3 +107,8 @@
   font-size: 12px;
   color: #cbd5e1;
 }
+
+.menuIcon {
+  font-size: 18px;
+  min-width: 20px;
+}

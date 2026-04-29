@@ -1,12 +1,14 @@
 import { NavLink } from "react-router-dom";
 import styles from "../style/sidebar.module.css";
+import { FiHome, FiUsers, FiCreditCard, FiFileText, FiSettings } from "react-icons/fi";
 
 export default function Sidebar() {
   return (
-    <div className={styles.sidebar}>
+    <aside className={styles.sidebar}>
       <div className={styles.logoArea}>
-        <div className={styles.logoIcon}>⌂</div>
-        {/* <svg preserveAspectRatio="xMidYMid meet" data-bbox="7.767 51.693 183.51 85.375" viewBox="7.767 51.693 183.51 85.375" height="200" width="200" xmlns="http://www.w3.org/2000/svg" data-type="color" role="img" aria-label="Página inicial">…</svg> */}
+        <div className={styles.logoIcon}>
+          <FiHome />
+        </div>
 
         <div>
           <h2>Taboão Center</h2>
@@ -14,74 +16,66 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <div className={styles.menu}>
+      <nav className={styles.menu}>
         <NavLink
           to="/"
           className={({ isActive }) =>
             isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
           }
         >
-          <span>⌂</span>
+          <FiHome className={styles.menuIcon} />
           Home
         </NavLink>
-      </div>
 
-      <div className={styles.menu}>
         <NavLink
           to="/inquilinos"
           className={({ isActive }) =>
             isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
           }
         >
-          <span>⌂</span>
+          <FiUsers className={styles.menuIcon} />
           Inquilinos
         </NavLink>
-      </div>
 
-      <div className={styles.menu}>
         <NavLink
           to="/cobrancas"
           className={({ isActive }) =>
             isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
           }
         >
-          <span>⌂</span>
+          <FiCreditCard className={styles.menuIcon} />
           Cobranças
         </NavLink>
-      </div>
 
-      <div className={styles.menu}>
         <NavLink
           to="/contratos"
           className={({ isActive }) =>
             isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
           }
         >
-          <span>⌂</span>
+          <FiFileText className={styles.menuIcon} />
           Contratos
         </NavLink>
-      </div>
 
-      <div className={styles.menu}>
         <NavLink
           to="/configuracoes"
           className={({ isActive }) =>
             isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
           }
         >
-          <span>⌂</span>
+          <FiSettings className={styles.menuIcon} />
           Configurações
         </NavLink>
-      </div>
+      </nav>
 
       <div className={styles.userArea}>
-        <div className={styles.avatarUser}>M</div>
+        <div className={styles.avatar}>M</div>
 
         <div className={styles.userInfo}>
           <strong>Murilo</strong>
           <span>Administrador</span>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
