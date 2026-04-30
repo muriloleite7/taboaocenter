@@ -1,4 +1,4 @@
-import styles from "../config.module.css";
+import styles from "../style/config.module.css";
 
 export default function Configuracoes() {
   return (

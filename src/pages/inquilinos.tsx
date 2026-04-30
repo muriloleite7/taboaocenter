@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/cards';
-import styles from '../inquilinos.module.css';
+import styles from '../style/inquilinos.module.css';
+import { Link } from "react-router-dom";
 
 export default function Inquilinos() {
   const inquilinos = [
@@ -50,7 +51,7 @@ export default function Inquilinos() {
     },
   ];
 
-   const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return (
     <div className={styles.inquilinos}>
@@ -190,7 +191,13 @@ export default function Inquilinos() {
 
                 <td>
                   <div className={styles.acoesTabela}>
-                    <button title="Ver detalhes">👁</button>
+                    <Link
+                      to={`/inquilinos/${index + 1}`}
+                      className={styles.botaoAcao}
+                      title="Ver detalhes"
+                    >
+                      👁
+                    </Link>
                     <button title="Editar">✎</button>
                     <button title="Mais opções">⋮</button>
                   </div>

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import Card from "../components/cards";
-import styles from "../home.module.css";
+import styles from "../style/home.module.css";
 
 export default function Home() {
    const navigate = useNavigate();

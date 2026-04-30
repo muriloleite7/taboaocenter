@@ -1,5 +1,6 @@
 import Card from "../components/cards";
-import styles from "../cobrancas.module.css";
+import styles from "../style/cobrancas.module.css";
+import { Link } from "react-router-dom";
 
 export default function Cobrancas() {
   const cobrancas = [
@@ -71,7 +72,9 @@ export default function Cobrancas() {
           </p>
         </div>
 
-        <button className={styles.lancarDespesa}>+ Lançar despesas</button>
+        <Link to="/lancar-despesas" className={styles.lancarDespesa}>
+          + Lançar despesas
+        </Link>
       </div>
 
       <div className={styles.cardsCobrancas}>
@@ -205,7 +208,13 @@ export default function Cobrancas() {
 
                 <td>
                   <div className={styles.acoesTabela}>
-                    <button title="Ver detalhes">👁</button>
+                    <Link
+                      to={`/inquilinos/${index + 1}`}
+                      className={styles.botaoAcao}
+                      title="Ver detalhes"
+                    >
+                      👁
+                    </Link>
                     <button title="Editar valores">✎</button>
                     <button title="Mais opções">⋮</button>
                   </div>

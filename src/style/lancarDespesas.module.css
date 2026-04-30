@@ -1,0 +1,238 @@
+.lancarDespesas {
+  width: 100%;
+}
+
+.headerDespesas {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tituloDespesas {
+  font-size: 32px;
+  color: #111827;
+}
+
+.subtituloDespesas {
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.formularioCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 40px;
+  margin-top: 30px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.section {
+  padding-bottom: 34px;
+  margin-bottom: 34px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sectionTitle {
+  font-size: 22px;
+  color: #111827;
+  margin-bottom: 24px;
+}
+
+.gridTres {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 24px;
+}
+
+.gridQuatro {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.campoGrupo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.campoGrupo label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.inputForm,
+.textareaForm {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+  background-color: #fcfcfd;
+  color: #111827;
+  transition: all 0.2s ease;
+}
+
+.inputForm {
+  height: 48px;
+  padding: 0 16px;
+}
+
+.textareaForm {
+  min-height: 100px;
+  padding: 14px 16px;
+  resize: vertical;
+}
+
+.inputForm:focus,
+.textareaForm:focus {
+  outline: none;
+  border-color: #4f46e5;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+.inputDisabled {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.buscaWrapper {
+  position: relative;
+}
+
+.listaResultados {
+  position: absolute;
+  z-index: 20;
+  width: 100%;
+  top: 56px;
+  left: 0;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background-color: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+.resultadoItem {
+  width: 100%;
+  border: none;
+  background-color: #ffffff;
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resultadoItem:hover {
+  background-color: #f8fafc;
+}
+
+.resultadoItem h3 {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.resultadoItem span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.semResultado {
+  padding: 14px 16px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.inquilinoSelecionado {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  background-color: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.inquilinoSelecionado span {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+
+.inquilinoSelecionado h3 {
+  font-size: 15px;
+  color: #111827;
+}
+
+.resumoGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.resumoCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+.resumoCard span {
+  display: block;
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.resumoCard h3 {
+  font-size: 20px;
+  color: #111827;
+}
+
+.statusPendente {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: #ffedd5;
+  color: #c2410c !important;
+  font-size: 14px !important;
+}
+
+.areaBotoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.botaoCancelar {
+  background: #ffffff;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  padding: 12px 28px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.botaoSalvar {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: white;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.botaoSalvar:hover,
+.botaoCancelar:hover {
+  opacity: 0.9;
+}

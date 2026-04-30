@@ -24,6 +24,10 @@
   cursor: pointer;
   font-size: 16px;
   min-width: 200px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cardsCobrancas {
@@ -308,4 +312,24 @@
   white-space: normal;
   line-height: 1.2;
   text-align: center;
+}
+
+.botaoAcao {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-size: 15px;
+  text-decoration: none;
+  color: #0f172a;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.botaoAcao:hover {
+  background-color: #f1f5f9;
 }

@@ -9,6 +9,9 @@ import Configuracoes from "./pages/config";
 
 import "./App.css";
 import NovoInquilino from "./pages/novoInquilino";
+import LancarDespesas from "./pages/lancarDespesas";
+import DetalheInquilino from "./pages/detalheInquilino";
+
 
 export default function App() {
   return (
@@ -23,6 +26,8 @@ export default function App() {
           <Route path="/contratos" element={<Contratos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/novo-inquilino" element={<NovoInquilino />} />
+          <Route path="/lancar-despesas" element={<LancarDespesas />} />
+          <Route path="/inquilinos/:id" element={<DetalheInquilino />} />
         </Routes>
       </main>
     </div>

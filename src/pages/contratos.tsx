@@ -1,5 +1,6 @@
+import { Link } from "react-router-dom";
 import Card from "../components/cards";
-import styles from "../contratos.module.css";
+import styles from "../style/contratos.module.css";
 
 export default function Contratos() {
   const contratos = [
@@ -179,10 +180,10 @@ export default function Contratos() {
                       contrato.status === "Ativo"
                         ? styles.statusAtivo
                         : contrato.status === "Vence em breve"
-                        ? styles.statusVenceBreve
-                        : contrato.status === "Renovação pendente"
-                        ? styles.statusRenovacao
-                        : styles.statusEncerrado
+                          ? styles.statusVenceBreve
+                          : contrato.status === "Renovação pendente"
+                            ? styles.statusRenovacao
+                            : styles.statusEncerrado
                     }
                   >
                     {contrato.status}
@@ -191,7 +192,13 @@ export default function Contratos() {
 
                 <td>
                   <div className={styles.acoesTabela}>
-                    <button title="Ver detalhes">👁</button>
+                    <Link
+                      to={`/inquilinos/${index + 1}`}
+                      className={styles.botaoAcao}
+                      title="Ver detalhes"
+                    >
+                      👁
+                    </Link>
                     <button title="Editar contrato">✎</button>
                     <button title="Mais opções">⋮</button>
                   </div>
