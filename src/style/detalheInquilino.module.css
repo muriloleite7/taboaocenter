@@ -21,7 +21,7 @@
 }
 
 .voltarLink {
-  color: #4f46e5;
+  color: #000000;
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;
@@ -126,7 +126,7 @@
 }
 
 .verTodasLink {
-  color: #4f46e5;
+  color: #000000;
   font-weight: 600;
   text-decoration: none;
 }
