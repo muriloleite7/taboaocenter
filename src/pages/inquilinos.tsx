@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import Card from '../components/cards';
 import styles from '../inquilinos.module.css';
 
@@ -49,6 +50,8 @@ export default function Inquilinos() {
     },
   ];
 
+   const navigate = useNavigate();
+
   return (
     <div className={styles.inquilinos}>
 
@@ -58,7 +61,7 @@ export default function Inquilinos() {
           <p className={styles.subtituloInquilinos}>Gerencie os inquilinos da imobiliária.</p>
         </div>
 
-        <button className={styles.novoInquilino}>+ Novo inquilino</button>
+        <button onClick={() => navigate("/novo-inquilino")} className={styles.novoInquilino}>+ Novo inquilino</button>
       </div>
 
       <div className={styles.cardsInquilinos}>

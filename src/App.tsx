@@ -8,6 +8,7 @@ import Contratos from "./pages/contratos";
 import Configuracoes from "./pages/config";
 
 import "./App.css";
+import NovoInquilino from "./pages/novoInquilino";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/cobrancas" element={<Cobrancas />} />
           <Route path="/contratos" element={<Contratos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
+          <Route path="/novo-inquilino" element={<NovoInquilino />} />
         </Routes>
       </main>
     </div>

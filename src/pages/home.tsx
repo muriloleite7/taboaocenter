@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router";
 import Card from "../components/cards";
 import styles from "../home.module.css";
 
 export default function Home() {
+   const navigate = useNavigate();
   return (
     <div className={styles.home}>
       <div className={styles.headerHome}>
@@ -10,7 +12,7 @@ export default function Home() {
           <p className={styles.subtituloHome}>Veja o resumo da imobiliária hoje.</p>
         </div>
 
-        <button className={styles.novoInquilino}>+ Novo inquilino</button>
+        <button onClick={() => navigate("/novo-inquilino")} className={styles.novoInquilino}>+ Novo inquilino</button>
       </div>
 
       <h2 className={styles.tituloCards}>Resumo geral</h2>
