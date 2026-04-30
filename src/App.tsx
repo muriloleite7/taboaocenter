@@ -11,6 +11,7 @@ import "./App.css";
 import NovoInquilino from "./pages/novoInquilino";
 import LancarDespesas from "./pages/lancarDespesas";
 import DetalheInquilino from "./pages/detalheInquilino";
+import EditarInquilino from "./pages/editarInquilino";
 
 
 export default function App() {
@@ -22,12 +23,13 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/inquilinos" element={<Inquilinos />} />
+          <Route path="/inquilinos/:id" element={<DetalheInquilino />} />
+          <Route path="/inquilinos/:id/editar" element={<EditarInquilino />} />
           <Route path="/cobrancas" element={<Cobrancas />} />
           <Route path="/contratos" element={<Contratos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/novo-inquilino" element={<NovoInquilino />} />
           <Route path="/lancar-despesas" element={<LancarDespesas />} />
-          <Route path="/inquilinos/:id" element={<DetalheInquilino />} />
         </Routes>
       </main>
     </div>

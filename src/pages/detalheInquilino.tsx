@@ -68,7 +68,9 @@ export default function DetalheInquilino() {
           <p>Detalhes completos do inquilino, contrato e cobranças.</p>
         </div>
 
-        <button className={styles.editarButton}>Editar inquilino</button>
+        <Link to={`/inquilinos/${id}/editar`} className={styles.editarButton}>
+          Editar inquilino
+        </Link>
       </div>
 
       <div className={styles.gridResumo}>

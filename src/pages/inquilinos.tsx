@@ -198,7 +198,13 @@ export default function Inquilinos() {
                     >
                       👁
                     </Link>
-                    <button title="Editar">✎</button>
+                    <Link
+                      to={`/inquilinos/${index + 1}/editar`}
+                      className={styles.botaoAcao}
+                      title="Editar"
+                    >
+                      ✎
+                    </Link>
                     <button title="Mais opções">⋮</button>
                   </div>
                 </td>
