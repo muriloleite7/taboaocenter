@@ -1,14 +1,14 @@
-/* NovoInquilino.module.css */
-
-.formularioCard {
-  background: white;
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin-top: 30px;
+.containerNovo {
+  width: 100%;
 }
 
-.secaoTitulo {
+.headerHome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tituloHome {
   font-size: 32px;
   color: #111827;
 }
@@ -18,11 +18,26 @@
   margin-top: 6px;
 }
 
+.formularioCard {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  margin-top: 30px;
+}
+
 .gridCampos {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-bottom: 40px;
+}
+
+.secaoTitulo {
+  grid-column: span 2;
+  font-size: 32px;
+  color: #111827;
+  margin-bottom: 4px;
 }
 
 .campoGrupo {
@@ -42,7 +57,9 @@
 }
 
 .inputForm {
-  padding: 12px 16px;
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 16px;
@@ -56,6 +73,95 @@
   background: white;
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
+
+/* DESPESAS DO CONTRATO */
+
+.despesasCard {
+  margin-top: 34px;
+  margin-bottom: 40px;
+  padding-top: 28px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.despesasCard .secaoTitulo {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.textoAjuda {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.despesaTitulo {
+  font-size: 17px;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.despesaLinha {
+  display: grid;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.despesaLinha:last-child {
+  border-bottom: none;
+}
+
+.despesaLinha strong {
+  display: block;
+  color: #111827;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.despesaLinha span {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.selectForm {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+  background-color: #fcfcfd;
+  color: #111827;
+  cursor: pointer;
+}
+
+.selectForm:focus {
+  outline: none;
+  border-color: #4f46e5;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+.inputDespesa {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+  background-color: #fcfcfd;
+}
+
+.inputDespesa:focus {
+  outline: none;
+  border-color: #4f46e5;
+  background-color: white;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* BOTÕES */
 
 .areaBotoes {
   display: flex;

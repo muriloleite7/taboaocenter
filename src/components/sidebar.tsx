@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import styles from "../style/sidebar.module.css";
-import { FiHome, FiUsers, FiCreditCard, FiFileText, FiSettings } from "react-icons/fi";
+import { FiHome, FiUsers, FiCreditCard, FiFileText, FiSettings } from "react-icons/fi"; {/* Ícones do React Icons para cada tela na sidebar */ }
 
 export default function Sidebar() {
   return (
