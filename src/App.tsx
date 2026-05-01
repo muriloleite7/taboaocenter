@@ -12,15 +12,21 @@ import NovoInquilino from "./pages/novoInquilino";
 import LancarDespesas from "./pages/lancarDespesas";
 import DetalheInquilino from "./pages/detalheInquilino";
 import EditarInquilino from "./pages/editarInquilino";
+import Login from "./pages/login";
+import Cadastro from "./pages/cadastro";
+import Layout from "./components/layout";
 
 
 export default function App() {
   return (
-    <div className="app">
-      <Sidebar />
+    
+      <Routes>
+        {/* - ROTAS PÚBLICAS (Sem Sidebar) - */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/cadastro" element={<Cadastro />} />
 
-      <main className="main-content">
-        <Routes>
+        {/* - ROTAS PRIVADAS (Com Sidebar) - */}
+        <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/inquilinos" element={<Inquilinos />} />
           <Route path="/inquilinos/:id" element={<DetalheInquilino />} />
@@ -29,10 +35,13 @@ export default function App() {
           <Route path="/contratos" element={<Contratos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/novo-inquilino" element={<NovoInquilino />} />
-          <Route path="/lancar-despesas" element={<LancarDespesas />} />
-        </Routes>
-      </main>
-    </div>
+          <Route path="/lancar-despesas" element={<LancarDespesas />} /> 
+        </Route>
+      </Routes>
+    
   );
 }
+          
+          
+       
 
