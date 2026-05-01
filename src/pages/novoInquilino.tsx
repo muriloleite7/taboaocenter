@@ -21,16 +21,39 @@ export default function NovoInquilino() {
 
     iptuTipo: "variavel",
     iptuValor: "",
+
+    cep: "",
+    rua: "",
+    bairro: "",
+    cidade: "",
+    uf: "",
+    numero: "",
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
+    let formattedValue = value;
+
+    // 1. Lógica das Máscaras (CPF e Telefone)
+    if (name === "cpf") formattedValue = maskCPF(value);
+    if (name === "telefone") formattedValue = maskPhone(value);
+
+    // 2. Limpeza Automática do Endereço
+    if (name === "cep" && value === "") {
+      setFormData((prev) => ({
+        ...prev,
+        cep: "",
+        rua: "",
+        bairro: "",
+        cidade: "",
+        uf: "",
+      }));
+      return;
+    }
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: formattedValue,
     }));
   };
 
@@ -40,6 +63,47 @@ export default function NovoInquilino() {
     console.log("Enviando dados:", formData);
 
     // Aqui entra a integração com o banco futuramente
+  };
+
+  // Remove tudo que não é número e aplica a máscara de CPF
+  const maskCPF = (value) => {
+    return value
+      .replace(/\D/g, "") // Remove letras
+      .replace(/(\d{3})(\d)/, "$1.$2") // Coloca o primeiro ponto
+      .replace(/(\d{3})(\d)/, "$1.$2") // Coloca o segundo ponto
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2") // Coloca o hífen
+      .substring(0, 14); // Limita o tamanho
+  };
+
+  // Máscara de Telefone (11) 99999-9999
+  const maskPhone = (value) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .substring(0, 15);
+  };
+
+  const checkCEP = (e) => {
+    const cep = e.target.value.replace(/\D/g, "");
+
+    if (cep === "") return;
+
+    if (cep.length !== 8) return;
+    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.erro) {
+          setFormData((prev) => ({
+            ...prev,
+            rua: data.logradouro,
+            bairro: data.bairro,
+            cidade: data.localidade,
+            uf: data.uf,
+          }));
+        }
+      })
+      .catch((err) => console.error("Erro ao buscar CEP:", err));
   };
 
   return (
@@ -102,6 +166,82 @@ export default function NovoInquilino() {
               className={styles.inputForm}
               placeholder="email@exemplo.com"
               value={formData.email}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        <div className={styles.gridCampos}>
+          <h3 className={styles.secaoTitulo}>Contato de emergência</h3>
+          <div className={styles.campoGrupo}>
+            <label className={styles.labelForm}>Nome do contato</label>
+            <input
+              type="text"
+              name="emergenciaNome"
+              className={styles.inputForm}
+              placeholder="Ex: Maria (Mãe)"
+              onChange={handleChange}
+            />
+          </div>
+          <div className={styles.campoGrupo}>
+            <label className={styles.labelForm}>Telefone de emergência</label>
+            <input
+              type="text"
+              name="emergenciaTel"
+              className={styles.inputForm}
+              placeholder="(11) 90000-0000"
+              onChange={handleChange}
+            />
+          </div>
+        </div>
+
+        <div className={styles.gridCampos}>
+          <h3 className={styles.secaoTitulo}>
+            Endereço de residência (Inquilino)
+          </h3>
+
+          <div className={styles.campoGrupo}>
+            <label className={styles.labelForm}>CEP</label>
+            <input
+              type="text"
+              name="cep"
+              className={styles.inputForm}
+              placeholder="00000-000"
+              value={formData.cep}
+              onChange={handleChange}
+              onBlur={checkCEP} // Busca quando o usuário clica fora do campo
+            />
+          </div>
+
+          <div className={styles.campoGrupo}>
+            <label className={styles.labelForm}>Rua</label>
+            <input
+              type="text"
+              name="rua"
+              className={styles.inputForm}
+              value={formData.rua}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className={styles.campoGrupo}>
+            <label className={styles.labelForm}>Bairro</label>
+            <input
+              type="text"
+              name="bairro"
+              className={styles.inputForm}
+              value={formData.bairro}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className={styles.campoGrupo}>
+            <label className={styles.labelForm}>Número / Comp.</label>
+            <input
+              type="text"
+              name="numero"
+              className={styles.inputForm}
+              value={formData.numero}
               onChange={handleChange}
             />
           </div>
