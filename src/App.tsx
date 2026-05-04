@@ -15,6 +15,7 @@ import EditarInquilino from "./pages/editarInquilino";
 import Login from "./pages/login";
 import Cadastro from "./pages/cadastro";
 import Layout from "./components/layout";
+import EditarCobranca from "./pages/editarCobranca";
 
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/inquilinos/:id" element={<DetalheInquilino />} />
           <Route path="/inquilinos/:id/editar" element={<EditarInquilino />} />
           <Route path="/cobrancas" element={<Cobrancas />} />
+          <Route path="/cobrancas/:id/editar" element={<EditarCobranca />} />
           <Route path="/contratos" element={<Contratos />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/novo-inquilino" element={<NovoInquilino />} />

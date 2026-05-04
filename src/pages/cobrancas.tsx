@@ -215,7 +215,13 @@ export default function Cobrancas() {
                     >
                       👁
                     </Link>
-                    <button title="Editar valores">✎</button>
+                    <Link
+                      to={`/cobrancas/${index + 1}/editar`}
+                      className={styles.botaoAcao}
+                      title="Editar valores"
+                    >
+                      ✎
+                    </Link>
                     <button title="Mais opções">⋮</button>
                   </div>
                 </td>
