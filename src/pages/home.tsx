@@ -1,18 +1,25 @@
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import Card from "../components/cards";
 import styles from "../style/home.module.css";
 
 export default function Home() {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   return (
     <div className={styles.home}>
       <div className={styles.headerHome}>
         <div>
           <h1 className={styles.tituloHome}>Olá, Murilo!</h1>
-          <p className={styles.subtituloHome}>Veja o resumo da imobiliária hoje.</p>
+          <p className={styles.subtituloHome}>
+            Veja o resumo da imobiliária hoje.
+          </p>
         </div>
 
-        <button onClick={() => navigate("/novo-inquilino")} className={styles.novoInquilino}>+ Novo inquilino</button>
+        <button
+          onClick={() => navigate("/novo-inquilino")}
+          className={styles.novoInquilino}
+        >
+          + Novo inquilino
+        </button>
       </div>
 
       <h2 className={styles.tituloCards}>Resumo geral</h2>
@@ -46,34 +53,48 @@ export default function Home() {
       <h2 className={styles.tituloCards}>Ações rápidas</h2>
 
       <div className={styles.cardsHome}>
+        <Link
+          to="/lancar-despesas"
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <Card
+            title="Nova cobrança"
+            value=""
+            description="Lançar aluguel, água ou luz"
+          />
+        </Link>
 
-        <Card 
-        title="Nova cobrança" 
-        value="" 
-        description="Lançar aluguel, água ou luz" 
+        <Link
+          to="/inquilinos"
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <Card
+            title="Buscar inquilino"
+            value=""
+            description="Consultar por nome ou CPF"
+          />
+        </Link>
+
+        <Link
+          to="/cobrancas"
+          style={{ textDecoration: "none", color: "inherit" }}>
+        <Card
+          title="Contratos"
+          value=""
+          description="Ver contratos próximos do vencimento"
         />
+        </Link>
 
-        <Card 
-        title="Buscar inquilino" 
-        value="" 
-        description="Consultar por nome ou CPF" 
+        <Link
+          to="/configuracoes"
+          style={{ textDecoration: "none", color: "inherit" }}>
+        <Card
+          title="Configurações"
+          value=""
+          description="Multa, juros e automações"
         />
-
-        <Card 
-        title="Contratos" 
-        value="" 
-        description="Ver contratos próximos do vencimento" 
-        />
-
-        <Card 
-        title="Configurações" 
-        value="" 
-        description="Multa, juros e automações" 
-        />
-
+        </Link>
       </div>
-
     </div>
   );
 }
-
