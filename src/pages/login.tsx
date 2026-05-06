@@ -2,15 +2,29 @@ import { useState } from 'react';
 import styles from '../style/auth.module.css';
 import { useNavigate } from 'react-router-dom';
 
-export default function Login({ aoMudarTela }) {
+export default function Login() {
   const [dados, setDados] = useState({ email: '', senha: '' });
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Tentativa de login:", dados);
-  };
-
+  const [erro, setErro] = useState('');
+  const [carregando, setCarregando] = useState(false);
+  
   const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErro('');
+    setCarregando(true);
+
+    // Simulação da chamada da API -> BACK-END
+    setTimeout(() => {
+      if (dados.email === "admin@taboao.com" && dados.senha === "123456") {
+        localStorage.setItem("@TaboaoCenter:User", JSON.stringify({ nome: "Murilo", logado: true }));
+        navigate("/");
+      } else {
+        setErro("E-mail ou senha inválidos. Tente novamente.");
+        setCarregando(false);
+      }
+    }, 1500); 
+  };
 
   return (
     <div className={styles.authWrapper}>
@@ -29,6 +43,7 @@ export default function Login({ aoMudarTela }) {
               type="email" 
               className={styles.inputField} 
               placeholder="seu@email.com"
+              value={dados.email}
               onChange={(e) => setDados({...dados, email: e.target.value})}
               required 
             />
@@ -40,12 +55,17 @@ export default function Login({ aoMudarTela }) {
               type="password" 
               className={styles.inputField} 
               placeholder="••••••••"
+              value={dados.senha}
               onChange={(e) => setDados({...dados, senha: e.target.value})}
               required 
             />
           </div>
 
-          <button type="submit" className={styles.btnAcesso}>Entrar no sistema</button>
+          {erro && <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '15px' }}>{erro}</p>}
+
+          <button type="submit" className={styles.btnAcesso} disabled={carregando}>
+            {carregando ? "Autenticando..." : "Entrar no sistema"}
+          </button>
         </form>
 
         <p className={styles.footerLink}>
