@@ -17,7 +17,6 @@ export default function EditarCobranca() {
       agua: "85",
       luz: "130",
       iptu: "95",
-      multa: "0",
       vencimento: "2026-05-10",
       status: "Pendente",
       observacao: "Cobrança aguardando pagamento.",
@@ -32,10 +31,9 @@ export default function EditarCobranca() {
       agua: "92",
       luz: "145",
       iptu: "110",
-      multa: "36",
       vencimento: "2026-05-08",
       status: "Atrasada",
-      observacao: "Multa aplicada por atraso.",
+      observacao: "Cobrança em atraso. Multa será calculada automaticamente.",
     },
     {
       id: "3",
@@ -47,7 +45,6 @@ export default function EditarCobranca() {
       agua: "78",
       luz: "118",
       iptu: "90",
-      multa: "0",
       vencimento: "2026-05-12",
       status: "Paga",
       observacao: "Pagamento confirmado.",
@@ -62,7 +59,6 @@ export default function EditarCobranca() {
       agua: "",
       luz: "",
       iptu: "",
-      multa: "",
       vencimento: "2026-05-15",
       status: "Despesas pendentes",
       observacao: "Aguardando lançamento de água, luz e IPTU.",
@@ -80,7 +76,6 @@ export default function EditarCobranca() {
     agua: cobrancaEncontrada?.agua || "",
     luz: cobrancaEncontrada?.luz || "",
     iptu: cobrancaEncontrada?.iptu || "",
-    multa: cobrancaEncontrada?.multa || "",
     vencimento: cobrancaEncontrada?.vencimento || "",
     status: cobrancaEncontrada?.status || "Pendente",
     observacao: cobrancaEncontrada?.observacao || "",
@@ -108,10 +103,14 @@ export default function EditarCobranca() {
   const agua = Number(formData.agua) || 0;
   const luz = Number(formData.luz) || 0;
   const iptu = Number(formData.iptu) || 0;
-  const multa = Number(formData.multa) || 0;
 
   const subtotal = aluguel + agua + luz + iptu;
-  const total = subtotal + multa;
+
+  // Por enquanto é visual.
+  // Futuramente o back-end calcula multa/juros com base nas Configurações.
+  const multaAutomatica = formData.status === "Atrasada" ? subtotal * 0.02 : 0;
+
+  const total = subtotal + multaAutomatica;
 
   const handleSalvar = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -120,6 +119,7 @@ export default function EditarCobranca() {
       id,
       ...formData,
       subtotal,
+      multaAutomatica,
       total,
     };
 
@@ -151,7 +151,7 @@ export default function EditarCobranca() {
           <h1 className={styles.tituloEditar}>Editar Cobrança</h1>
 
           <p className={styles.subtituloEditar}>
-            Atualize os valores, vencimento e status de uma cobrança específica.
+            Atualize os valores, vencimento e status desta cobrança específica.
           </p>
         </div>
       </div>
@@ -159,9 +159,9 @@ export default function EditarCobranca() {
       <div className={styles.avisoEdicao}>
         <h3>Atenção</h3>
         <p>
-          As alterações feitas aqui afetam apenas esta cobrança. Para alterar
-          dados do inquilino, aluguel base futuro ou regras do contrato, use a
-          tela de editar inquilino.
+          As alterações feitas aqui afetam apenas esta cobrança. A multa não é
+          editada manualmente, pois será calculada automaticamente conforme as
+          regras definidas em Configurações.
         </p>
       </div>
 
@@ -296,19 +296,6 @@ export default function EditarCobranca() {
             </div>
 
             <div className={styles.campoGrupo}>
-              <label className={styles.labelForm}>Multa</label>
-
-              <input
-                type="number"
-                name="multa"
-                className={styles.inputForm}
-                value={formData.multa}
-                onChange={handleChange}
-                placeholder="0,00"
-              />
-            </div>
-
-            <div className={styles.campoGrupo}>
               <label className={styles.labelForm}>Status</label>
 
               <select
@@ -348,8 +335,8 @@ export default function EditarCobranca() {
             </div>
 
             <div className={styles.resumoCard}>
-              <span>Multa</span>
-              <h3>{formatarMoeda(multa)}</h3>
+              <span>Multa automática</span>
+              <h3>{formatarMoeda(multaAutomatica)}</h3>
             </div>
 
             <div className={styles.resumoCard}>
