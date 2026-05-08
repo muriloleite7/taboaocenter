@@ -128,13 +128,15 @@
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
 
-.inputBloqueado {
+.inputBloqueado,
+.inputForm:disabled {
   background-color: #f3f4f6;
   color: #6b7280;
   cursor: not-allowed;
 }
 
-.inputBloqueado:focus {
+.inputBloqueado:focus,
+.inputForm:disabled:focus {
   border-color: #d1d5db;
   background-color: #f3f4f6;
   box-shadow: none;
@@ -144,6 +146,53 @@
   color: #64748b;
   font-size: 12px;
   line-height: 1.4;
+}
+
+.pagamentoInfo {
+  background-color: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.pagamentoTexto h3 {
+  color: #111827;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.pagamentoTexto p {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.pagamentoStatus {
+  min-width: 180px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.pagamentoStatus span {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.pagamentoStatus h3 {
+  color: #4f46e5;
+  font-size: 18px;
+  margin: 0;
 }
 
 .resumoGrid {

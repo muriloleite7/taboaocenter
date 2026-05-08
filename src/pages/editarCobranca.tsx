@@ -19,7 +19,10 @@ export default function EditarCobranca() {
       iptu: "95",
       vencimento: "2026-05-10",
       status: "Pendente",
-      observacao: "Cobrança aguardando pagamento.",
+      formaPagamento: "Aguardando pagamento",
+      dataPagamento: "",
+      origemPagamento: "Automático",
+      observacao: "Cobrança aguardando pagamento por Pix ou boleto.",
     },
     {
       id: "2",
@@ -33,6 +36,9 @@ export default function EditarCobranca() {
       iptu: "110",
       vencimento: "2026-05-08",
       status: "Atrasada",
+      formaPagamento: "Aguardando pagamento",
+      dataPagamento: "",
+      origemPagamento: "Automático",
       observacao: "Cobrança em atraso. Multa será calculada automaticamente.",
     },
     {
@@ -47,7 +53,10 @@ export default function EditarCobranca() {
       iptu: "90",
       vencimento: "2026-05-12",
       status: "Paga",
-      observacao: "Pagamento confirmado.",
+      formaPagamento: "Pix",
+      dataPagamento: "2026-05-11",
+      origemPagamento: "Automático",
+      observacao: "Pagamento confirmado automaticamente via Pix.",
     },
     {
       id: "4",
@@ -61,6 +70,9 @@ export default function EditarCobranca() {
       iptu: "",
       vencimento: "2026-05-15",
       status: "Despesas pendentes",
+      formaPagamento: "Aguardando pagamento",
+      dataPagamento: "",
+      origemPagamento: "Automático",
       observacao: "Aguardando lançamento de água, luz e IPTU.",
     },
   ];
@@ -78,6 +90,9 @@ export default function EditarCobranca() {
     iptu: cobrancaEncontrada?.iptu || "",
     vencimento: cobrancaEncontrada?.vencimento || "",
     status: cobrancaEncontrada?.status || "Pendente",
+    formaPagamento: cobrancaEncontrada?.formaPagamento || "Aguardando pagamento",
+    dataPagamento: cobrancaEncontrada?.dataPagamento || "",
+    origemPagamento: cobrancaEncontrada?.origemPagamento || "Automático",
     observacao: cobrancaEncontrada?.observacao || "",
   });
 
@@ -89,6 +104,17 @@ export default function EditarCobranca() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleOrigemPagamentoChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const origem = e.target.value;
+
+    setFormData((prev) => ({
+      ...prev,
+      origemPagamento: origem,
+      formaPagamento: origem === "Manual" ? "Dinheiro" : "Aguardando pagamento",
+      dataPagamento: origem === "Manual" ? prev.dataPagamento : "",
     }));
   };
 
@@ -107,7 +133,7 @@ export default function EditarCobranca() {
   const subtotal = aluguel + agua + luz + iptu;
 
   // Por enquanto é visual.
-  // Futuramente o back-end calcula multa/juros com base nas Configurações.
+  // Futuramente o back-end deve calcular multa e juros usando as regras da tela Configurações.
   const multaAutomatica = formData.status === "Atrasada" ? subtotal * 0.02 : 0;
 
   const total = subtotal + multaAutomatica;
@@ -159,9 +185,9 @@ export default function EditarCobranca() {
       <div className={styles.avisoEdicao}>
         <h3>Atenção</h3>
         <p>
-          As alterações feitas aqui afetam apenas esta cobrança. A multa não é
-          editada manualmente, pois será calculada automaticamente conforme as
-          regras definidas em Configurações.
+          Pix e boleto devem ser confirmados automaticamente pelo sistema. Use a
+          edição manual apenas para corrigir valores, ajustar status ou registrar
+          pagamentos feitos por fora, como dinheiro.
         </p>
       </div>
 
@@ -322,6 +348,94 @@ export default function EditarCobranca() {
               onChange={handleChange}
               placeholder="Adicione uma observação sobre esta cobrança..."
             />
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <h2 className={styles.secaoTitulo}>Pagamento</h2>
+
+          <div className={styles.pagamentoInfo}>
+            <div className={styles.pagamentoTexto}>
+              <h3>Confirmação automática</h3>
+              <p>
+                Quando o inquilino pagar por Pix ou boleto, o sistema deverá
+                atualizar esta cobrança automaticamente. O registro manual deve
+                ser usado apenas para pagamentos por fora ou ajustes internos.
+              </p>
+            </div>
+
+            <div className={styles.pagamentoStatus}>
+              <span>Origem atual</span>
+              <h3>{formData.origemPagamento}</h3>
+            </div>
+          </div>
+
+          <div className={styles.gridCampos}>
+            <div className={styles.campoGrupo}>
+              <label className={styles.labelForm}>Origem do pagamento</label>
+
+              <select
+                name="origemPagamento"
+                className={styles.inputForm}
+                value={formData.origemPagamento}
+                onChange={handleOrigemPagamentoChange}
+              >
+                <option>Automático</option>
+                <option>Manual</option>
+              </select>
+            </div>
+
+            <div className={styles.campoGrupo}>
+              <label className={styles.labelForm}>Forma de pagamento</label>
+
+              <select
+                name="formaPagamento"
+                className={styles.inputForm}
+                value={formData.formaPagamento}
+                onChange={handleChange}
+                disabled={formData.origemPagamento === "Automático"}
+              >
+                {formData.origemPagamento === "Automático" ? (
+                  <>
+                    <option>Aguardando pagamento</option>
+                    <option>Pix</option>
+                    <option>Boleto</option>
+                  </>
+                ) : (
+                  <>
+                    <option>Dinheiro</option>
+                    <option>Transferência</option>
+                    <option>Outro</option>
+                  </>
+                )}
+              </select>
+
+              {formData.origemPagamento === "Automático" && (
+                <span className={styles.campoAjuda}>
+                  Em pagamentos automáticos, a forma será preenchida pelo
+                  sistema após a confirmação.
+                </span>
+              )}
+            </div>
+
+            <div className={styles.campoGrupo}>
+              <label className={styles.labelForm}>Data de pagamento</label>
+
+              <input
+                type="date"
+                name="dataPagamento"
+                className={styles.inputForm}
+                value={formData.dataPagamento}
+                onChange={handleChange}
+                disabled={formData.origemPagamento === "Automático"}
+              />
+
+              {formData.origemPagamento === "Automático" && (
+                <span className={styles.campoAjuda}>
+                  A data será preenchida automaticamente após o pagamento.
+                </span>
+              )}
+            </div>
           </div>
         </section>
 
