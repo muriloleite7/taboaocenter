@@ -1,53 +1,13 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useParams, Link } from "react-router-dom";
+import { getInquilinoById } from "../data/inquilinosMock";
 import styles from "../style/editarInquilino.module.css";
 
 export default function EditarInquilino() {
   const { id } = useParams();
 
-  const inquilinos = [
-    {
-      id: "1",
-      nome: "João Silva",
-      cpf: "123.456.789-00",
-      telefone: "(11) 98765-4321",
-      email: "joao.silva@email.com",
-      imovel: "Apto 101",
-      aluguel: "1500",
-      vencimento: "10",
-      dataInicio: "2025-05-10",
-      dataFim: "2026-05-10",
-      aguaTipo: "variavel",
-      aguaValor: "",
-      luzTipo: "variavel",
-      luzValor: "",
-      iptuTipo: "fixo",
-      iptuValor: "95",
-    },
-    {
-      id: "2",
-      nome: "Maria Clara",
-      cpf: "987.654.321-00",
-      telefone: "(11) 97654-3210",
-      email: "maria.clara@email.com",
-      imovel: "Casa 02",
-      aluguel: "1800",
-      vencimento: "15",
-      dataInicio: "2025-05-15",
-      dataFim: "2026-05-15",
-      aguaTipo: "fixo",
-      aguaValor: "80",
-      luzTipo: "variavel",
-      luzValor: "",
-      iptuTipo: "fixo",
-      iptuValor: "110",
-    },
-  ];
-
-  const inquilinoEncontrado = inquilinos.find(
-    (inquilino) => inquilino.id === id
-  );
+  const inquilinoEncontrado = getInquilinoById(id);
 
   const [formData, setFormData] = useState({
     nome: inquilinoEncontrado?.nome || "",
@@ -56,7 +16,7 @@ export default function EditarInquilino() {
     email: inquilinoEncontrado?.email || "",
     imovel: inquilinoEncontrado?.imovel || "",
     aluguel: inquilinoEncontrado?.aluguel || "",
-    vencimento: inquilinoEncontrado?.vencimento || "",
+    vencimento: inquilinoEncontrado?.diaVencimento || "",
     dataInicio: inquilinoEncontrado?.dataInicio || "",
     dataFim: inquilinoEncontrado?.dataFim || "",
 
@@ -88,8 +48,6 @@ export default function EditarInquilino() {
       id,
       ...formData,
     });
-
-    // Futuramente aqui entra o PUT/PATCH para atualizar no banco
   };
 
   if (!inquilinoEncontrado) {

@@ -1,88 +1,25 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
+import { getInquilinoById } from "../data/inquilinosMock";
+import {
+  calcularMultaAutomatica,
+  calcularSubtotal,
+  formatarMoeda,
+  getCobrancaById,
+} from "../data/cobrancasMock";
 import styles from "../style/editarCobranca.module.css";
 
 export default function EditarCobranca() {
   const { id } = useParams();
 
-  const cobrancas = [
-    {
-      id: "1",
-      nome: "João Silva",
-      cpf: "123.456.789-00",
-      imovel: "Apto 101",
-      referencia: "Maio/2026",
-      aluguel: "1500",
-      agua: "85",
-      luz: "130",
-      iptu: "95",
-      vencimento: "2026-05-10",
-      status: "Pendente",
-      formaPagamento: "Aguardando pagamento",
-      dataPagamento: "",
-      origemPagamento: "Automático",
-      observacao: "Cobrança aguardando pagamento por Pix ou boleto.",
-    },
-    {
-      id: "2",
-      nome: "Maria Clara",
-      cpf: "987.654.321-00",
-      imovel: "Casa 02",
-      referencia: "Maio/2026",
-      aluguel: "1800",
-      agua: "92",
-      luz: "145",
-      iptu: "110",
-      vencimento: "2026-05-08",
-      status: "Atrasada",
-      formaPagamento: "Aguardando pagamento",
-      dataPagamento: "",
-      origemPagamento: "Automático",
-      observacao: "Cobrança em atraso. Multa será calculada automaticamente.",
-    },
-    {
-      id: "3",
-      nome: "Rafael Pereira",
-      cpf: "456.789.123-00",
-      imovel: "Apto 203",
-      referencia: "Maio/2026",
-      aluguel: "1600",
-      agua: "78",
-      luz: "118",
-      iptu: "90",
-      vencimento: "2026-05-12",
-      status: "Paga",
-      formaPagamento: "Pix",
-      dataPagamento: "2026-05-11",
-      origemPagamento: "Automático",
-      observacao: "Pagamento confirmado automaticamente via Pix.",
-    },
-    {
-      id: "4",
-      nome: "Ana Souza",
-      cpf: "321.654.987-00",
-      imovel: "Casa 05",
-      referencia: "Maio/2026",
-      aluguel: "1700",
-      agua: "",
-      luz: "",
-      iptu: "",
-      vencimento: "2026-05-15",
-      status: "Despesas pendentes",
-      formaPagamento: "Aguardando pagamento",
-      dataPagamento: "",
-      origemPagamento: "Automático",
-      observacao: "Aguardando lançamento de água, luz e IPTU.",
-    },
-  ];
-
-  const cobrancaEncontrada = cobrancas.find((cobranca) => cobranca.id === id);
+  const cobrancaEncontrada = getCobrancaById(id);
+  const inquilino = getInquilinoById(cobrancaEncontrada?.inquilinoId);
 
   const [formData, setFormData] = useState({
-    nome: cobrancaEncontrada?.nome || "",
-    cpf: cobrancaEncontrada?.cpf || "",
-    imovel: cobrancaEncontrada?.imovel || "",
+    nome: inquilino?.nome || "",
+    cpf: inquilino?.cpf || "",
+    imovel: inquilino?.imovel || "",
     referencia: cobrancaEncontrada?.referencia || "",
     aluguel: cobrancaEncontrada?.aluguel || "",
     agua: cobrancaEncontrada?.agua || "",
@@ -118,24 +55,8 @@ export default function EditarCobranca() {
     }));
   };
 
-  const formatarMoeda = (valor: number) => {
-    return valor.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    });
-  };
-
-  const aluguel = Number(formData.aluguel) || 0;
-  const agua = Number(formData.agua) || 0;
-  const luz = Number(formData.luz) || 0;
-  const iptu = Number(formData.iptu) || 0;
-
-  const subtotal = aluguel + agua + luz + iptu;
-
-  // Por enquanto é visual.
-  // Futuramente o back-end deve calcular multa e juros usando as regras da tela Configurações.
-  const multaAutomatica = formData.status === "Atrasada" ? subtotal * 0.02 : 0;
-
+  const subtotal = calcularSubtotal(formData);
+  const multaAutomatica = calcularMultaAutomatica(formData.status, subtotal);
   const total = subtotal + multaAutomatica;
 
   const handleSalvar = (e: FormEvent<HTMLFormElement>) => {
@@ -150,11 +71,9 @@ export default function EditarCobranca() {
     };
 
     console.log("Cobrança atualizada:", dadosAtualizados);
-
-    // Futuramente aqui entra o PUT/PATCH para atualizar no banco
   };
 
-  if (!cobrancaEncontrada) {
+  if (!cobrancaEncontrada || !inquilino) {
     return (
       <div className={styles.containerEditar}>
         <h1>Cobrança não encontrada</h1>

@@ -1,54 +1,27 @@
 import { useParams, Link } from "react-router-dom";
+import {
+  formatarTipoDespesa,
+  getInquilinoById,
+} from "../data/inquilinosMock";
+import {
+  calcularMultaAutomatica,
+  calcularSubtotal,
+  formatarMoeda,
+  getCobrancasByInquilinoId,
+} from "../data/cobrancasMock";
 import styles from "../style/detalheInquilino.module.css";
 
 export default function DetalheInquilino() {
   const { id } = useParams();
 
-  const inquilinos = [
-    {
-      id: "1",
-      nome: "João Silva",
-      email: "joao.silva@email.com",
-      cpf: "123.456.789-00",
-      telefone: "(11) 98765-4321",
-      imovel: "Apto 101",
-      endereco: "Av. José Lopes de Oliveira",
-      aluguel: "R$ 1.500,00",
-      vencimento: "Todo dia 10",
-      inicioContrato: "10/05/2025",
-      fimContrato: "10/05/2026",
-      statusContrato: "Ativo",
-      agua: "Variável mensal",
-      luz: "Variável mensal",
-      iptu: "Valor fixo",
-      statusPagamento: "Pendente",
-    },
-    {
-      id: "2",
-      nome: "Maria Clara",
-      email: "maria.clara@email.com",
-      cpf: "987.654.321-00",
-      telefone: "(11) 97654-3210",
-      imovel: "Casa 02",
-      endereco: "Parque Assunção",
-      aluguel: "R$ 1.800,00",
-      vencimento: "Todo dia 15",
-      inicioContrato: "15/05/2025",
-      fimContrato: "15/05/2026",
-      statusContrato: "Ativo",
-      agua: "Valor fixo",
-      luz: "Variável mensal",
-      iptu: "Valor fixo",
-      statusPagamento: "Com pendência",
-    },
-  ];
-
-  const inquilino = inquilinos.find((item) => item.id === id);
+  const inquilino = getInquilinoById(id);
+  const cobrancasDoInquilino = getCobrancasByInquilinoId(id);
 
   if (!inquilino) {
     return (
       <div className={styles.detalheInquilino}>
         <h1>Inquilino não encontrado</h1>
+
         <Link to="/inquilinos" className={styles.voltarLink}>
           Voltar para inquilinos
         </Link>
@@ -81,12 +54,12 @@ export default function DetalheInquilino() {
 
         <div className={styles.resumoCard}>
           <span>Aluguel</span>
-          <h3>{inquilino.aluguel}</h3>
+          <h3>{formatarMoeda(Number(inquilino.aluguel))}</h3>
         </div>
 
         <div className={styles.resumoCard}>
           <span>Vencimento</span>
-          <h3>{inquilino.vencimento}</h3>
+          <h3>{inquilino.vencimentoTexto}</h3>
         </div>
 
         <div className={styles.resumoCard}>
@@ -139,12 +112,12 @@ export default function DetalheInquilino() {
 
           <div className={styles.infoLinha}>
             <span>Início</span>
-            <h3>{inquilino.inicioContrato}</h3>
+            <h3>{inquilino.dataInicio}</h3>
           </div>
 
           <div className={styles.infoLinha}>
             <span>Fim</span>
-            <h3>{inquilino.fimContrato}</h3>
+            <h3>{inquilino.dataFim}</h3>
           </div>
 
           <div className={styles.infoLinha}>
@@ -158,17 +131,23 @@ export default function DetalheInquilino() {
 
           <div className={styles.infoLinha}>
             <span>Água</span>
-            <h3>{inquilino.agua}</h3>
+            <h3>
+              {formatarTipoDespesa(inquilino.aguaTipo, inquilino.aguaValor)}
+            </h3>
           </div>
 
           <div className={styles.infoLinha}>
             <span>Luz</span>
-            <h3>{inquilino.luz}</h3>
+            <h3>
+              {formatarTipoDespesa(inquilino.luzTipo, inquilino.luzValor)}
+            </h3>
           </div>
 
           <div className={styles.infoLinha}>
             <span>IPTU</span>
-            <h3>{inquilino.iptu}</h3>
+            <h3>
+              {formatarTipoDespesa(inquilino.iptuTipo, inquilino.iptuValor)}
+            </h3>
           </div>
         </section>
       </div>
@@ -186,23 +165,19 @@ export default function DetalheInquilino() {
         </div>
 
         <div className={styles.cobrancasLista}>
-          <div className={styles.cobrancaItem}>
-            <span>Maio/2026</span>
-            <h3>R$ 1.810,00</h3>
-            <p>Pendente</p>
-          </div>
+          {cobrancasDoInquilino.map((cobranca) => {
+            const subtotal = calcularSubtotal(cobranca);
+            const multa = calcularMultaAutomatica(cobranca.status, subtotal);
+            const total = subtotal + multa;
 
-          <div className={styles.cobrancaItem}>
-            <span>Abril/2026</span>
-            <h3>R$ 1.760,00</h3>
-            <p>Paga</p>
-          </div>
-
-          <div className={styles.cobrancaItem}>
-            <span>Março/2026</span>
-            <h3>R$ 1.740,00</h3>
-            <p>Paga</p>
-          </div>
+            return (
+              <div className={styles.cobrancaItem} key={cobranca.id}>
+                <span>{cobranca.referencia}</span>
+                <h3>{formatarMoeda(total)}</h3>
+                <p>{cobranca.status}</p>
+              </div>
+            );
+          })}
         </div>
       </section>
     </div>

@@ -1,47 +1,10 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
+import { inquilinosMock, type InquilinoMock } from "../data/inquilinosMock";
+import { formatarMoeda } from "../data/cobrancasMock";
 import styles from "../style/lancarDespesas.module.css";
 
-type Inquilino = {
-  nome: string;
-  cpf: string;
-  imovel: string;
-  aluguel: string;
-  vencimento: string;
-};
-
 export default function LancarDespesas() {
-  const inquilinos: Inquilino[] = [
-    {
-      nome: "João Silva",
-      cpf: "123.456.789-00",
-      imovel: "Apto 101",
-      aluguel: "1500",
-      vencimento: "2026-05-10",
-    },
-    {
-      nome: "Maria Clara",
-      cpf: "987.654.321-00",
-      imovel: "Casa 02",
-      aluguel: "1800",
-      vencimento: "2026-05-15",
-    },
-    {
-      nome: "Rafael Pereira",
-      cpf: "456.789.123-00",
-      imovel: "Apto 203",
-      aluguel: "1600",
-      vencimento: "2026-05-12",
-    },
-    {
-      nome: "Ana Souza",
-      cpf: "321.654.987-00",
-      imovel: "Casa 05",
-      aluguel: "1700",
-      vencimento: "2026-05-15",
-    },
-  ];
-
   const [busca, setBusca] = useState("");
   const [mostrarResultados, setMostrarResultados] = useState(false);
 
@@ -58,13 +21,13 @@ export default function LancarDespesas() {
     observacao: "",
   });
 
-  const resultadosBusca = inquilinos.filter((inquilino) => {
+  const resultadosBusca = inquilinosMock.filter((inquilino) => {
     const textoBusca = `${inquilino.nome} ${inquilino.cpf} ${inquilino.imovel}`;
 
     return textoBusca.toLowerCase().includes(busca.toLowerCase());
   });
 
-  const selecionarInquilino = (inquilino: Inquilino) => {
+  const selecionarInquilino = (inquilino: InquilinoMock) => {
     setBusca(`${inquilino.nome} - ${inquilino.imovel}`);
     setMostrarResultados(false);
 
@@ -74,7 +37,7 @@ export default function LancarDespesas() {
       cpf: inquilino.cpf,
       imovel: inquilino.imovel,
       aluguel: inquilino.aluguel,
-      vencimento: inquilino.vencimento,
+      vencimento: inquilino.vencimentoData,
     }));
   };
 
@@ -103,13 +66,6 @@ export default function LancarDespesas() {
       ...prev,
       [name]: value,
     }));
-  };
-
-  const formatarMoeda = (valor: number) => {
-    return valor.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    });
   };
 
   const aluguel = Number(formData.aluguel) || 0;
@@ -171,7 +127,7 @@ export default function LancarDespesas() {
                       resultadosBusca.map((inquilino) => (
                         <button
                           type="button"
-                          key={inquilino.cpf}
+                          key={inquilino.id}
                           className={styles.resultadoItem}
                           onClick={() => selecionarInquilino(inquilino)}
                         >

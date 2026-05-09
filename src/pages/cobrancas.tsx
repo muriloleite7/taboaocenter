@@ -1,66 +1,17 @@
 import Card from "../components/cards";
 import styles from "../style/cobrancas.module.css";
 import { Link } from "react-router-dom";
+import { getInquilinoById } from "../data/inquilinosMock";
+import {
+  calcularMultaAutomatica,
+  calcularSubtotal,
+  cobrancasMock,
+  formatarData,
+  formatarMoeda,
+} from "../data/cobrancasMock";
 
 export default function Cobrancas() {
-  const cobrancas = [
-    {
-      nome: "João Silva",
-      email: "joao.silva@email.com",
-      cpf: "123.456.789-00",
-      referencia: "Maio/2026",
-      aluguel: "R$ 1.500,00",
-      agua: "R$ 85,00",
-      luz: "R$ 130,00",
-      iptu: "R$ 95,00",
-      multa: "R$ 0,00",
-      total: "R$ 1.810,00",
-      vencimento: "10/05/2026",
-      status: "Pendente",
-    },
-    {
-      nome: "Maria Clara",
-      email: "maria.clara@email.com",
-      cpf: "987.654.321-00",
-      referencia: "Maio/2026",
-      aluguel: "R$ 1.800,00",
-      agua: "R$ 92,00",
-      luz: "R$ 145,00",
-      iptu: "R$ 110,00",
-      multa: "R$ 36,00",
-      total: "R$ 2.183,00",
-      vencimento: "08/05/2026",
-      status: "Atrasada",
-    },
-    {
-      nome: "Rafael Pereira",
-      email: "rafael.pereira@email.com",
-      cpf: "456.789.123-00",
-      referencia: "Maio/2026",
-      aluguel: "R$ 1.600,00",
-      agua: "R$ 78,00",
-      luz: "R$ 118,00",
-      iptu: "R$ 90,00",
-      multa: "R$ 0,00",
-      total: "R$ 1.886,00",
-      vencimento: "12/05/2026",
-      status: "Paga",
-    },
-    {
-      nome: "Ana Souza",
-      email: "ana.souza@email.com",
-      cpf: "321.654.987-00",
-      referencia: "Maio/2026",
-      aluguel: "R$ 1.700,00",
-      agua: "—",
-      luz: "—",
-      iptu: "—",
-      multa: "—",
-      total: "Aguardando despesas",
-      vencimento: "15/05/2026",
-      status: "Despesas pendentes",
-    },
-  ];
+  const cobrancas = cobrancasMock;
 
   return (
     <div className={styles.cobrancas}>
@@ -159,74 +110,99 @@ export default function Cobrancas() {
           </thead>
 
           <tbody>
-            {cobrancas.map((cobranca, index) => (
-              <tr key={index}>
-                <td>
-                  <div className={styles.infoCobranca}>
-                    <div className={styles.avatarCobranca}>
-                      {cobranca.nome
-                        .split(" ")
-                        .map((parteNome) => parteNome[0])
-                        .join("")
-                        .slice(0, 2)}
+            {cobrancas.map((cobranca) => {
+              const inquilino = getInquilinoById(cobranca.inquilinoId);
+              const subtotal = calcularSubtotal(cobranca);
+              const multa = calcularMultaAutomatica(cobranca.status, subtotal);
+              const total = subtotal + multa;
+
+              if (!inquilino) return null;
+
+              return (
+                <tr key={cobranca.id}>
+                  <td>
+                    <div className={styles.infoCobranca}>
+                      <div className={styles.avatarCobranca}>
+                        {inquilino.nome
+                          .split(" ")
+                          .map((parteNome) => parteNome[0])
+                          .join("")
+                          .slice(0, 2)}
+                      </div>
+
+                      <div>
+                        <strong>{inquilino.nome}</strong>
+                        <span>{inquilino.email}</span>
+                      </div>
                     </div>
+                  </td>
 
-                    <div>
-                      <strong>{cobranca.nome}</strong>
-                      <span>{cobranca.email}</span>
-                    </div>
-                  </div>
-                </td>
+                  <td>{inquilino.cpf}</td>
+                  <td>{cobranca.referencia}</td>
+                  <td>{formatarMoeda(Number(cobranca.aluguel))}</td>
+                  <td>
+                    {cobranca.agua ? formatarMoeda(Number(cobranca.agua)) : "—"}
+                  </td>
+                  <td>
+                    {cobranca.luz ? formatarMoeda(Number(cobranca.luz)) : "—"}
+                  </td>
+                  <td>
+                    {cobranca.iptu ? formatarMoeda(Number(cobranca.iptu)) : "—"}
+                  </td>
+                  <td>{multa ? formatarMoeda(multa) : "—"}</td>
 
-                <td>{cobranca.cpf}</td>
-                <td>{cobranca.referencia}</td>
-                <td>{cobranca.aluguel}</td>
-                <td>{cobranca.agua}</td>
-                <td>{cobranca.luz}</td>
-                <td>{cobranca.iptu}</td>
-                <td>{cobranca.multa}</td>
-                <td>
-                  <span className={styles.valorTotal}>{cobranca.total}</span>
-                </td>
-                <td>{cobranca.vencimento}</td>
+                  <td>
+                    <span className={styles.valorTotal}>
+                      {cobranca.status === "Despesas pendentes"
+                        ? "Aguardando despesas"
+                        : formatarMoeda(total)}
+                    </span>
+                  </td>
 
-                <td>
-                  <span
-                    className={
-                      cobranca.status === "Paga"
-                        ? styles.statusPago
-                        : cobranca.status === "Atrasada"
+                  <td>{formatarData(cobranca.vencimento)}</td>
+
+                  <td>
+                    <span
+                      className={
+                        cobranca.status === "Paga"
+                          ? styles.statusPago
+                          : cobranca.status === "Atrasada"
                           ? styles.statusAtrasado
                           : cobranca.status === "Despesas pendentes"
-                            ? styles.statusDespesas
-                            : styles.statusPendente
-                    }
-                  >
-                    <span className={styles.statusText}>{cobranca.status}</span>
-                  </span>
-                </td>
+                          ? styles.statusDespesas
+                          : styles.statusPendente
+                      }
+                    >
+                      <span className={styles.statusText}>
+                        {cobranca.status}
+                      </span>
+                    </span>
+                  </td>
 
-                <td>
-                  <div className={styles.acoesTabela}>
-                    <Link
-                      to={`/inquilinos/${index + 1}`}
-                      className={styles.botaoAcao}
-                      title="Ver detalhes"
-                    >
-                      👁
-                    </Link>
-                    <Link
-                      to={`/cobrancas/${index + 1}/editar`}
-                      className={styles.botaoAcao}
-                      title="Editar valores"
-                    >
-                      ✎
-                    </Link>
-                    <button title="Mais opções">⋮</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  <td>
+                    <div className={styles.acoesTabela}>
+                      <Link
+                        to={`/inquilinos/${inquilino.id}`}
+                        className={styles.botaoAcao}
+                        title="Ver detalhes do inquilino"
+                      >
+                        👁
+                      </Link>
+
+                      <Link
+                        to={`/cobrancas/${cobranca.id}/editar`}
+                        className={styles.botaoAcao}
+                        title="Editar valores"
+                      >
+                        ✎
+                      </Link>
+
+                      <button title="Mais opções">⋮</button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
