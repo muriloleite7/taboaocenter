@@ -1,8 +1,19 @@
 import { NavLink } from "react-router-dom";
 import styles from "../style/sidebar.module.css";
-import { FiHome, FiUsers, FiCreditCard, FiFileText, FiSettings } from "react-icons/fi"; {/* Ícones do React Icons para cada tela na sidebar */ }
+import {
+  FiHome,
+  FiUsers,
+  FiCreditCard,
+  FiFileText,
+  FiSettings,
+} from "react-icons/fi";
+import { useAuth } from "../auth/authContext";
+{
+  /* Ícones do React Icons para cada tela na sidebar */
+}
 
 export default function Sidebar() {
+  const { user, logout } = useAuth();
   return (
     <aside className={styles.sidebar}>
       <div className={styles.logoArea}>
@@ -75,6 +86,11 @@ export default function Sidebar() {
           <strong>Murilo</strong>
           <span>Administrador</span>
         </div>
+
+        {/* falta style para o botão de logout */}
+        <button onClick={logout}>
+          Sair
+        </button>
       </div>
     </aside>
   );

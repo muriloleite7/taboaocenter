@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import styles from '../style/auth.module.css';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/authContext';
+
 
 export default function Login() {
   const [dados, setDados] = useState({ email: '', senha: '' });
@@ -8,6 +10,7 @@ export default function Login() {
   const [carregando, setCarregando] = useState(false);
   
   const navigate = useNavigate();
+  const { login } = useAuth(); 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +20,13 @@ export default function Login() {
     // Simulação da chamada da API -> BACK-END
     setTimeout(() => {
       if (dados.email === "admin@taboao.com" && dados.senha === "123456") {
-        localStorage.setItem("@TaboaoCenter:User", JSON.stringify({ nome: "Murilo", logado: true }));
+        
+        login({ 
+          nome: "Murilo", 
+          email: dados.email, 
+          cargo: "Administrador" 
+        });
+
         navigate("/");
       } else {
         setErro("E-mail ou senha inválidos. Tente novamente.");

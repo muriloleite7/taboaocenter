@@ -64,11 +64,7 @@ export default function Contratos() {
       </div>
 
       <div className={styles.cardsContratos}>
-        <Card
-          title="Contratos ativos"
-          value={468}
-          description="Em andamento"
-        />
+        <Card title="Contratos ativos" value={468} description="Em andamento" />
 
         <Card
           title="Vencem em 30 dias"
@@ -193,14 +189,24 @@ export default function Contratos() {
                 <td>
                   <div className={styles.acoesTabela}>
                     <Link
-                      to={`/inquilinos/${index + 1}`}
+                      to={`/contratos/${index + 1}`}
                       className={styles.botaoAcao}
                       title="Ver detalhes"
                     >
                       👁
                     </Link>
-                    <button title="Editar contrato">✎</button>
-                    <button title="Mais opções">⋮</button>
+                    <Link to={`/contratos/${index + 1}/editar`} className={styles.botaoAcao} title="Editar contrato">
+                      ✎
+                    </Link>
+                    {contrato.status !== "Encerrado" && (
+                      <Link
+                        to={`/contratos/${index + 1}/renovar`}
+                        className={styles.botaoAcao}
+                        title="Renovar contrato"
+                      >
+                        ↻
+                      </Link>
+                    )}
                   </div>
                 </td>
               </tr>
