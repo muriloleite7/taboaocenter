@@ -1,54 +1,78 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Card from "../components/cards";
 import styles from "../style/contratos.module.css";
+import { contratosMock } from "../data/contratosMock";
+import { getInquilinoById } from "../data/inquilinosMock";
 
 export default function Contratos() {
-  const contratos = [
-    {
-      nome: "João Silva",
-      email: "joao.silva@email.com",
-      cpf: "123.456.789-00",
-      imovel: "Apto 101",
-      endereco: "Av. José Lopes de Oliveira",
-      inicio: "10/05/2025",
-      fim: "10/05/2026",
-      diasRestantes: "12 dias",
-      status: "Vence em breve",
-    },
-    {
-      nome: "Maria Clara",
-      email: "maria.clara@email.com",
-      cpf: "987.654.321-00",
-      imovel: "Casa 02",
-      endereco: "Jd. São Paulo",
-      inicio: "15/05/2025",
-      fim: "15/05/2026",
-      diasRestantes: "17 dias",
-      status: "Ativo",
-    },
-    {
-      nome: "Rafael Pereira",
-      email: "rafael.pereira@email.com",
-      cpf: "456.789.123-00",
-      imovel: "Apto 203",
-      endereco: "Rua das Flores",
-      inicio: "01/04/2025",
-      fim: "01/05/2026",
-      diasRestantes: "Renovação",
-      status: "Renovação pendente",
-    },
-    {
-      nome: "Ana Souza",
-      email: "ana.souza@email.com",
-      cpf: "321.654.987-00",
-      imovel: "Casa 05",
-      endereco: "Jd. Roberto",
-      inicio: "08/05/2024",
-      fim: "08/05/2025",
-      diasRestantes: "Encerrado",
-      status: "Encerrado",
-    },
-  ];
+  const [busca, setBusca] = useState("");
+  const [statusSelecionado, setStatusSelecionado] = useState("Todos");
+  const [periodoSelecionado, setPeriodoSelecionado] = useState("Todos");
+  const [menuAberto, setMenuAberto] = useState<string | null>(null);
+
+  const contratosFiltrados = contratosMock.filter((contrato) => {
+    const inquilino = getInquilinoById(contrato.inquilinoId);
+
+    if (!inquilino) return false;
+
+    const textoBusca = `
+      ${inquilino.nome}
+      ${inquilino.email}
+      ${inquilino.cpf}
+      ${inquilino.imovel}
+      ${inquilino.endereco}
+      ${contrato.status}
+      ${contrato.inicio}
+      ${contrato.fim}
+    `.toLowerCase();
+
+    const bateBusca = textoBusca.includes(busca.toLowerCase());
+
+    const bateStatus =
+      statusSelecionado === "Todos" || contrato.status === statusSelecionado;
+
+    const batePeriodo =
+      periodoSelecionado === "Todos" ||
+      (periodoSelecionado === "Próximos 30 dias" &&
+        contrato.status === "Vence em breve") ||
+      (periodoSelecionado === "Próximos 60 dias" &&
+        contrato.status !== "Encerrado") ||
+      (periodoSelecionado === "Este mês" &&
+        contrato.status !== "Encerrado");
+
+    return bateBusca && bateStatus && batePeriodo;
+  });
+
+  const totalAtivos = contratosMock.filter(
+    (contrato) => contrato.status === "Ativo" || contrato.status === "Vence em breve"
+  ).length;
+
+  const totalVencemBreve = contratosMock.filter(
+    (contrato) => contrato.status === "Vence em breve"
+  ).length;
+
+  const totalRenovacao = contratosMock.filter(
+    (contrato) => contrato.status === "Renovação pendente"
+  ).length;
+
+  const totalEncerrados = contratosMock.filter(
+    (contrato) => contrato.status === "Encerrado"
+  ).length;
+
+  const alternarMenu = (id: string) => {
+    setMenuAberto((menuAtual) => (menuAtual === id ? null : id));
+  };
+
+  const handleEnviarAviso = (id: string) => {
+    alert(`Aqui futuramente será enviado um aviso sobre o contrato ${id}.`);
+    setMenuAberto(null);
+  };
+
+  const handleEncerrarContrato = (id: string) => {
+    alert(`Aqui futuramente será possível encerrar o contrato ${id}.`);
+    setMenuAberto(null);
+  };
 
   return (
     <div className={styles.contratos}>
@@ -64,23 +88,27 @@ export default function Contratos() {
       </div>
 
       <div className={styles.cardsContratos}>
-        <Card title="Contratos ativos" value={468} description="Em andamento" />
+        <Card
+          title="Contratos ativos"
+          value={totalAtivos}
+          description="Em andamento"
+        />
 
         <Card
           title="Vencem em 30 dias"
-          value={18}
+          value={totalVencemBreve}
           description="Precisam de atenção"
         />
 
         <Card
           title="Renovação pendente"
-          value={7}
+          value={totalRenovacao}
           description="Aguardando retorno"
         />
 
         <Card
           title="Encerrados"
-          value={32}
+          value={totalEncerrados}
           description="Contratos finalizados"
         />
       </div>
@@ -93,13 +121,19 @@ export default function Contratos() {
             type="text"
             placeholder="Buscar por inquilino, CPF ou imóvel..."
             className={styles.searchInput}
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
           />
         </div>
 
         <div className={styles.filterGroup}>
           <label>Status</label>
 
-          <select className={styles.selectFilter}>
+          <select
+            className={styles.selectFilter}
+            value={statusSelecionado}
+            onChange={(e) => setStatusSelecionado(e.target.value)}
+          >
             <option>Todos</option>
             <option>Ativo</option>
             <option>Vence em breve</option>
@@ -111,7 +145,11 @@ export default function Contratos() {
         <div className={styles.filterGroup}>
           <label>Período</label>
 
-          <select className={styles.selectFilter}>
+          <select
+            className={styles.selectFilter}
+            value={periodoSelecionado}
+            onChange={(e) => setPeriodoSelecionado(e.target.value)}
+          >
             <option>Todos</option>
             <option>Próximos 30 dias</option>
             <option>Próximos 60 dias</option>
@@ -138,84 +176,138 @@ export default function Contratos() {
           </thead>
 
           <tbody>
-            {contratos.map((contrato, index) => (
-              <tr key={index}>
-                <td>
-                  <div className={styles.infoContrato}>
-                    <div className={styles.avatarContrato}>
-                      {contrato.nome
-                        .split(" ")
-                        .map((parteNome) => parteNome[0])
-                        .join("")
-                        .slice(0, 2)}
+            {contratosFiltrados.map((contrato) => {
+              const inquilino = getInquilinoById(contrato.inquilinoId);
+
+              if (!inquilino) return null;
+
+              return (
+                <tr key={contrato.id}>
+                  <td>
+                    <div className={styles.infoContrato}>
+                      <div className={styles.avatarContrato}>
+                        {inquilino.nome
+                          .split(" ")
+                          .map((parteNome) => parteNome[0])
+                          .join("")
+                          .slice(0, 2)}
+                      </div>
+
+                      <div>
+                        <strong>{inquilino.nome}</strong>
+                        <span>{inquilino.email}</span>
+                      </div>
                     </div>
+                  </td>
 
-                    <div>
-                      <strong>{contrato.nome}</strong>
-                      <span>{contrato.email}</span>
+                  <td>{inquilino.cpf}</td>
+
+                  <td>
+                    <div className={styles.infoImovel}>
+                      <strong>{inquilino.imovel}</strong>
+                      <span>{inquilino.endereco}</span>
                     </div>
-                  </div>
-                </td>
+                  </td>
 
-                <td>{contrato.cpf}</td>
+                  <td>{contrato.inicio}</td>
+                  <td>{contrato.fim}</td>
+                  <td>{contrato.diasRestantes}</td>
 
-                <td>
-                  <div className={styles.infoImovel}>
-                    <strong>{contrato.imovel}</strong>
-                    <span>{contrato.endereco}</span>
-                  </div>
-                </td>
-
-                <td>{contrato.inicio}</td>
-                <td>{contrato.fim}</td>
-                <td>{contrato.diasRestantes}</td>
-
-                <td>
-                  <span
-                    className={
-                      contrato.status === "Ativo"
-                        ? styles.statusAtivo
-                        : contrato.status === "Vence em breve"
+                  <td>
+                    <span
+                      className={
+                        contrato.status === "Ativo"
+                          ? styles.statusAtivo
+                          : contrato.status === "Vence em breve"
                           ? styles.statusVenceBreve
                           : contrato.status === "Renovação pendente"
-                            ? styles.statusRenovacao
-                            : styles.statusEncerrado
-                    }
-                  >
-                    {contrato.status}
-                  </span>
-                </td>
-
-                <td>
-                  <div className={styles.acoesTabela}>
-                    <Link
-                      to={`/contratos/${index + 1}`}
-                      className={styles.botaoAcao}
-                      title="Ver detalhes"
+                          ? styles.statusRenovacao
+                          : styles.statusEncerrado
+                      }
                     >
-                      👁
-                    </Link>
-                    <Link to={`/contratos/${index + 1}/editar`} className={styles.botaoAcao} title="Editar contrato">
-                      ✎
-                    </Link>
-                    {contrato.status !== "Encerrado" && (
+                      {contrato.status}
+                    </span>
+                  </td>
+
+                  <td>
+                    <div className={styles.acoesTabela}>
                       <Link
-                        to={`/contratos/${index + 1}/renovar`}
+                        to={`/contratos/${contrato.id}`}
                         className={styles.botaoAcao}
-                        title="Renovar contrato"
+                        title="Ver detalhes"
                       >
-                        ↻
+                        👁
                       </Link>
-                    )}
-                  </div>
+
+                      <Link
+                        to={`/contratos/${contrato.id}/editar`}
+                        className={styles.botaoAcao}
+                        title="Editar contrato"
+                      >
+                        ✎
+                      </Link>
+
+                      <div className={styles.menuWrapper}>
+                        <button
+                          type="button"
+                          title="Mais opções"
+                          onClick={() => alternarMenu(contrato.id)}
+                        >
+                          ⋮
+                        </button>
+
+                        {menuAberto === contrato.id && (
+                          <div className={styles.menuAcoes}>
+                            <Link to={`/contratos/${contrato.id}/renovar`}>
+                              Renovar contrato
+                            </Link>
+
+                            <Link to={`/inquilinos/${inquilino.id}`}>
+                              Ver inquilino
+                            </Link>
+
+                            <button
+                              type="button"
+                              onClick={() => handleEnviarAviso(contrato.id)}
+                            >
+                              Enviar aviso
+                            </button>
+
+                            {contrato.status !== "Encerrado" && (
+                              <button
+                                type="button"
+                                className={styles.acaoPerigosa}
+                                onClick={() =>
+                                  handleEncerrarContrato(contrato.id)
+                                }
+                              >
+                                Encerrar contrato
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+
+            {contratosFiltrados.length === 0 && (
+              <tr>
+                <td colSpan={8} className={styles.semResultados}>
+                  Nenhum contrato encontrado.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
 
         <div className={styles.rodapeTabela}>
-          <span>Mostrando 1 a 4 de 500 contratos</span>
+          <span>
+            Mostrando {contratosFiltrados.length} de {contratosMock.length}{" "}
+            contratos
+          </span>
 
           <div className={styles.paginacao}>
             <button>{"<"}</button>

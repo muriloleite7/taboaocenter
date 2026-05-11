@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Card from "../components/cards";
 import styles from "../style/cobrancas.module.css";
 import { Link } from "react-router-dom";
@@ -11,7 +12,69 @@ import {
 } from "../data/cobrancasMock";
 
 export default function Cobrancas() {
-  const cobrancas = cobrancasMock;
+  const [busca, setBusca] = useState("");
+  const [statusSelecionado, setStatusSelecionado] = useState("Todos");
+  const [referenciaSelecionada, setReferenciaSelecionada] = useState("Todos");
+  const [menuAberto, setMenuAberto] = useState<string | null>(null);
+
+  const cobrancasFiltradas = cobrancasMock.filter((cobranca) => {
+    const inquilino = getInquilinoById(cobranca.inquilinoId);
+
+    if (!inquilino) return false;
+
+    const textoBusca = `
+      ${inquilino.nome}
+      ${inquilino.email}
+      ${inquilino.cpf}
+      ${inquilino.imovel}
+      ${cobranca.referencia}
+      ${cobranca.status}
+    `.toLowerCase();
+
+    const bateBusca = textoBusca.includes(busca.toLowerCase());
+
+    const bateStatus =
+      statusSelecionado === "Todos" || cobranca.status === statusSelecionado;
+
+    const bateReferencia =
+      referenciaSelecionada === "Todos" ||
+      cobranca.referencia === referenciaSelecionada;
+
+    return bateBusca && bateStatus && bateReferencia;
+  });
+
+  const totalPendentes = cobrancasMock.filter(
+    (cobranca) => cobranca.status === "Pendente"
+  ).length;
+
+  const totalAtrasadas = cobrancasMock.filter(
+    (cobranca) => cobranca.status === "Atrasada"
+  ).length;
+
+  const totalDespesasPendentes = cobrancasMock.filter(
+    (cobranca) => cobranca.status === "Despesas pendentes"
+  ).length;
+
+  const alternarMenu = (id: string) => {
+    setMenuAberto((menuAtual) => (menuAtual === id ? null : id));
+  };
+
+  const handleReenviarCobranca = (nome: string) => {
+    alert(`Aqui futuramente será reenviada a cobrança para ${nome} no WhatsApp.`);
+    setMenuAberto(null);
+  };
+
+  const handleRegistrarManual = (id: string) => {
+    alert(
+      `Aqui futuramente abrirá o registro de pagamento manual da cobrança ${id}.`
+    );
+    setMenuAberto(null);
+  };
+
+  const handleCancelarCobranca = (id: string) => {
+    alert(`Aqui futuramente será possível cancelar a cobrança ${id}.`);
+    setMenuAberto(null);
+  };
 
   return (
     <div className={styles.cobrancas}>
@@ -31,7 +94,7 @@ export default function Cobrancas() {
       <div className={styles.cardsCobrancas}>
         <Card
           title="Cobranças pendentes"
-          value={88}
+          value={totalPendentes}
           description="Aguardando pagamento"
         />
 
@@ -43,13 +106,13 @@ export default function Cobrancas() {
 
         <Card
           title="Atrasadas"
-          value={26}
+          value={totalAtrasadas}
           description="Com multa aplicada"
         />
 
         <Card
           title="Despesas a lançar"
-          value={15}
+          value={totalDespesasPendentes}
           description="Água, luz e IPTU pendentes"
         />
       </div>
@@ -62,13 +125,19 @@ export default function Cobrancas() {
             type="text"
             placeholder="Buscar por inquilino, CPF ou referência..."
             className={styles.searchInput}
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
           />
         </div>
 
         <div className={styles.filterGroup}>
           <label>Status</label>
 
-          <select className={styles.selectFilter}>
+          <select
+            className={styles.selectFilter}
+            value={statusSelecionado}
+            onChange={(e) => setStatusSelecionado(e.target.value)}
+          >
             <option>Todos</option>
             <option>Pendente</option>
             <option>Paga</option>
@@ -80,7 +149,12 @@ export default function Cobrancas() {
         <div className={styles.filterGroup}>
           <label>Referência</label>
 
-          <select className={styles.selectFilter}>
+          <select
+            className={styles.selectFilter}
+            value={referenciaSelecionada}
+            onChange={(e) => setReferenciaSelecionada(e.target.value)}
+          >
+            <option>Todos</option>
             <option>Maio/2026</option>
             <option>Abril/2026</option>
             <option>Março/2026</option>
@@ -110,7 +184,7 @@ export default function Cobrancas() {
           </thead>
 
           <tbody>
-            {cobrancas.map((cobranca) => {
+            {cobrancasFiltradas.map((cobranca) => {
               const inquilino = getInquilinoById(cobranca.inquilinoId);
               const subtotal = calcularSubtotal(cobranca);
               const multa = calcularMultaAutomatica(cobranca.status, subtotal);
@@ -140,15 +214,19 @@ export default function Cobrancas() {
                   <td>{inquilino.cpf}</td>
                   <td>{cobranca.referencia}</td>
                   <td>{formatarMoeda(Number(cobranca.aluguel))}</td>
+
                   <td>
                     {cobranca.agua ? formatarMoeda(Number(cobranca.agua)) : "—"}
                   </td>
+
                   <td>
                     {cobranca.luz ? formatarMoeda(Number(cobranca.luz)) : "—"}
                   </td>
+
                   <td>
                     {cobranca.iptu ? formatarMoeda(Number(cobranca.iptu)) : "—"}
                   </td>
+
                   <td>{multa ? formatarMoeda(multa) : "—"}</td>
 
                   <td>
@@ -197,17 +275,66 @@ export default function Cobrancas() {
                         ✎
                       </Link>
 
-                      <button title="Mais opções">⋮</button>
+                      <div className={styles.menuWrapper}>
+                        <button
+                          type="button"
+                          title="Mais opções"
+                          onClick={() => alternarMenu(cobranca.id)}
+                        >
+                          ⋮
+                        </button>
+
+                        {menuAberto === cobranca.id && (
+                          <div className={styles.menuAcoes}>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleReenviarCobranca(inquilino.nome)
+                              }
+                            >
+                              Reenviar WhatsApp
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRegistrarManual(cobranca.id)
+                              }
+                            >
+                              Registrar pagamento manual
+                            </button>
+
+                            <button
+                              type="button"
+                              className={styles.acaoPerigosa}
+                              onClick={() => handleCancelarCobranca(cobranca.id)}
+                            >
+                              Cancelar cobrança
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
                 </tr>
               );
             })}
+
+            {cobrancasFiltradas.length === 0 && (
+              <tr>
+                <td colSpan={12} className={styles.semResultados}>
+                  Nenhuma cobrança encontrada.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
 
         <div className={styles.rodapeTabela}>
-          <span>Mostrando 1 a 4 de 88 cobranças</span>
+          <span>
+            Mostrando {cobrancasFiltradas.length} de {cobrancasMock.length}{" "}
+            cobranças
+          </span>
 
           <div className={styles.paginacao}>
             <button>{"<"}</button>

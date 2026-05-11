@@ -102,7 +102,6 @@
   cursor: pointer;
 }
 
-.moreFilters,
 .exportButton {
   height: 46px;
   border: 1px solid #d8dee8;
@@ -113,15 +112,11 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  margin-left: auto;
 }
 
-.moreFilters:hover,
 .exportButton:hover {
   background-color: #f8fafc;
-}
-
-.exportButton {
-  margin-left: auto;
 }
 
 .tabelaContainer {
@@ -129,7 +124,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   margin-top: 26px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
 }
 
@@ -235,6 +230,76 @@
   background-color: #f1f5f9;
 }
 
+.botaoAcao {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-size: 15px;
+  text-decoration: none;
+  color: #0f172a;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.botaoAcao:hover {
+  background-color: #f1f5f9;
+}
+
+.menuWrapper {
+  position: relative;
+}
+
+.menuAcoes {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  z-index: 30;
+
+  width: 190px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+  padding: 6px;
+}
+
+.menuAcoes button {
+  width: 100%;
+  height: auto;
+  min-height: 38px;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #0f172a;
+  font-size: 14px;
+  text-align: left;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.menuAcoes button:hover {
+  background-color: #f8fafc;
+}
+
+.menuAcoes .acaoPerigosa {
+  color: #b91c1c;
+}
+
+.menuAcoes .acaoPerigosa:hover {
+  background-color: #fee2e2;
+}
+
+.semResultados {
+  text-align: center;
+  color: #64748b;
+  padding: 28px !important;
+}
+
 .rodapeTabela {
   padding: 18px 22px;
   display: flex;
@@ -272,24 +337,4 @@
   background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
   color: #ffffff !important;
   border: none !important;
-}
-
-.botaoAcao {
-  width: 36px;
-  height: 36px;
-  border: 1px solid #d8dee8;
-  border-radius: 8px;
-  background-color: #ffffff;
-  cursor: pointer;
-  font-size: 15px;
-  text-decoration: none;
-  color: #0f172a;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.botaoAcao:hover {
-  background-color: #f1f5f9;
 }
