@@ -268,9 +268,9 @@
   padding: 6px;
 }
 
-.menuAcoes button {
+.menuAcoes button,
+.menuAcoes a {
   width: 100%;
-  height: auto;
   min-height: 38px;
   border: none;
   border-radius: 8px;
@@ -280,9 +280,14 @@
   text-align: left;
   padding: 10px 12px;
   cursor: pointer;
+  text-decoration: none;
+
+  display: flex;
+  align-items: center;
 }
 
-.menuAcoes button:hover {
+.menuAcoes button:hover,
+.menuAcoes a:hover {
   background-color: #f8fafc;
 }
 

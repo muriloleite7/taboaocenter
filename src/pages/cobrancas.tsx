@@ -10,12 +10,15 @@ import {
   formatarData,
   formatarMoeda,
 } from "../data/cobrancasMock";
+import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 
 export default function Cobrancas() {
   const [busca, setBusca] = useState("");
   const [statusSelecionado, setStatusSelecionado] = useState("Todos");
   const [referenciaSelecionada, setReferenciaSelecionada] = useState("Todos");
   const [menuAberto, setMenuAberto] = useState<string | null>(null);
+
+  const isAdmin = usuarioLogadoMock.cargo === "admin";
 
   const cobrancasFiltradas = cobrancasMock.filter((cobranca) => {
     const inquilino = getInquilinoById(cobranca.inquilinoId);
@@ -64,15 +67,14 @@ export default function Cobrancas() {
     setMenuAberto(null);
   };
 
-  const handleRegistrarManual = (id: string) => {
-    alert(
-      `Aqui futuramente abrirá o registro de pagamento manual da cobrança ${id}.`
-    );
-    setMenuAberto(null);
-  };
-
   const handleCancelarCobranca = (id: string) => {
-    alert(`Aqui futuramente será possível cancelar a cobrança ${id}.`);
+    const confirmar = window.confirm(
+      `Tem certeza que deseja cancelar a cobrança ${id}? Essa ação deve ser feita apenas por um administrador.`
+    );
+
+    if (!confirmar) return;
+
+    alert(`Cobrança ${id} cancelada com sucesso.`);
     setMenuAberto(null);
   };
 
@@ -295,22 +297,24 @@ export default function Cobrancas() {
                               Reenviar WhatsApp
                             </button>
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleRegistrarManual(cobranca.id)
-                              }
+                            <Link
+                              to={`/cobrancas/${cobranca.id}/editar`}
+                              onClick={() => setMenuAberto(null)}
                             >
                               Registrar pagamento manual
-                            </button>
+                            </Link>
 
-                            <button
-                              type="button"
-                              className={styles.acaoPerigosa}
-                              onClick={() => handleCancelarCobranca(cobranca.id)}
-                            >
-                              Cancelar cobrança
-                            </button>
+                            {isAdmin && (
+                              <button
+                                type="button"
+                                className={styles.acaoPerigosa}
+                                onClick={() =>
+                                  handleCancelarCobranca(cobranca.id)
+                                }
+                              >
+                                Cancelar cobrança
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>

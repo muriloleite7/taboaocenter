@@ -4,12 +4,15 @@ import Card from "../components/cards";
 import styles from "../style/contratos.module.css";
 import { contratosMock } from "../data/contratosMock";
 import { getInquilinoById } from "../data/inquilinosMock";
+import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 
 export default function Contratos() {
   const [busca, setBusca] = useState("");
   const [statusSelecionado, setStatusSelecionado] = useState("Todos");
   const [periodoSelecionado, setPeriodoSelecionado] = useState("Todos");
   const [menuAberto, setMenuAberto] = useState<string | null>(null);
+
+  const isAdmin = usuarioLogadoMock.cargo === "admin";
 
   const contratosFiltrados = contratosMock.filter((contrato) => {
     const inquilino = getInquilinoById(contrato.inquilinoId);
@@ -38,14 +41,14 @@ export default function Contratos() {
         contrato.status === "Vence em breve") ||
       (periodoSelecionado === "Próximos 60 dias" &&
         contrato.status !== "Encerrado") ||
-      (periodoSelecionado === "Este mês" &&
-        contrato.status !== "Encerrado");
+      (periodoSelecionado === "Este mês" && contrato.status !== "Encerrado");
 
     return bateBusca && bateStatus && batePeriodo;
   });
 
   const totalAtivos = contratosMock.filter(
-    (contrato) => contrato.status === "Ativo" || contrato.status === "Vence em breve"
+    (contrato) =>
+      contrato.status === "Ativo" || contrato.status === "Vence em breve"
   ).length;
 
   const totalVencemBreve = contratosMock.filter(
@@ -70,7 +73,13 @@ export default function Contratos() {
   };
 
   const handleEncerrarContrato = (id: string) => {
-    alert(`Aqui futuramente será possível encerrar o contrato ${id}.`);
+    const confirmar = window.confirm(
+      `Tem certeza que deseja encerrar o contrato ${id}? Essa ação deve ser feita apenas por um administrador.`
+    );
+
+    if (!confirmar) return;
+
+    alert(`Contrato ${id} encerrado com sucesso.`);
     setMenuAberto(null);
   };
 
@@ -273,7 +282,7 @@ export default function Contratos() {
                               Enviar aviso
                             </button>
 
-                            {contrato.status !== "Encerrado" && (
+                            {isAdmin && contrato.status !== "Encerrado" && (
                               <button
                                 type="button"
                                 className={styles.acaoPerigosa}
