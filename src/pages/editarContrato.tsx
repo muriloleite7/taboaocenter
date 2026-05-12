@@ -21,19 +21,26 @@ export default function EditarContrato() {
   });
 
   useEffect(() => {
-    // PREPARAÇÃO PARA DB: Busca os dados atuais do contrato
+    const contratosSalvos = JSON.parse(localStorage.getItem("contratos_db") || "{}");
+    
     setTimeout(() => {
-      setFormData({
-        inquilino: "João Silva",
-        imovel: "Apto 101",
-        aluguel: "1500",
-        vencimento: "10",
-        dataInicio: "2025-05-10",
-        dataFim: "2026-05-10",
-        aguaTipo: "fixo",
-        luzTipo: "variavel",
-        iptuTipo: "fixo"
-      });
+      if (contratosSalvos[id!]) {
+        // se ja foi editado antes, carrega as edições
+        setFormData(contratosSalvos[id!]);
+      } else {
+        // se for a primeira vez, carrega os dados mockados
+        setFormData({
+          inquilino: "João Silva",
+          imovel: "Apto 101",
+          aluguel: "1500",
+          vencimento: "10",
+          dataInicio: "2025-05-10",
+          dataFim: "2026-05-10",
+          aguaTipo: "fixo",
+          luzTipo: "variavel",
+          iptuTipo: "fixo"
+        });
+      }
       setLoading(false);
     }, 500);
   }, [id]);
@@ -45,7 +52,17 @@ export default function EditarContrato() {
 
   const handleSalvar = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Alterações de contrato salvas:", formData);
+    
+    // pega o banco local atual
+    const contratosSalvos = JSON.parse(localStorage.getItem("contratos_db") || "{}");
+    
+    // atualiza os dados desse id específico
+    contratosSalvos[id!] = { ...formData, id };
+    
+    // salva de volta
+    localStorage.setItem("contratos_db", JSON.stringify(contratosSalvos));
+
+    alert("Alterações de contrato salvas com sucesso!");
     navigate(`/contratos/${id}`);
   };
 

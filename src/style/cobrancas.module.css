@@ -30,6 +30,11 @@
   justify-content: center;
 }
 
+.lancarDespesa:hover {
+  background: linear-gradient(135deg, #4338ca, #4f46e5); 
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+
 .cardsCobrancas {
   display: flex;
   gap: 40px;
