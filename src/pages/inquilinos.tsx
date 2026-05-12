@@ -4,6 +4,7 @@ import Card from "../components/cards";
 import styles from "../style/inquilinos.module.css";
 import { inquilinosMock } from "../data/inquilinosMock";
 import { formatarMoeda, formatarData } from "../data/cobrancasMock";
+import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 
 export default function Inquilinos() {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ export default function Inquilinos() {
   const [statusSelecionado, setStatusSelecionado] = useState("Todos");
   const [tipoImovelSelecionado, setTipoImovelSelecionado] = useState("Todos");
   const [menuAberto, setMenuAberto] = useState<string | null>(null);
+
+  const isAdmin = usuarioLogadoMock.cargo === "admin";
 
   const getTipoImovel = (imovel: string) => {
     if (imovel.toLowerCase().includes("casa")) return "Casa";
@@ -77,12 +80,24 @@ export default function Inquilinos() {
   };
 
   const handleEncerrarContrato = (nome: string) => {
-    alert(`Aqui futuramente será possível encerrar o contrato de ${nome}.`);
+    const confirmar = window.confirm(
+      `Tem certeza que deseja encerrar o contrato de ${nome}? Essa ação deve ser feita apenas por um administrador.`
+    );
+
+    if (!confirmar) return;
+
+    alert(`Contrato de ${nome} encerrado com sucesso.`);
     setMenuAberto(null);
   };
 
   const handleArquivarInquilino = (nome: string) => {
-    alert(`Aqui futuramente será possível arquivar/desativar ${nome}.`);
+    const confirmar = window.confirm(
+      `Tem certeza que deseja arquivar ${nome}? O histórico será mantido, mas o inquilino ficará inativo.`
+    );
+
+    if (!confirmar) return;
+
+    alert(`${nome} foi arquivado com sucesso.`);
     setMenuAberto(null);
   };
 
@@ -275,24 +290,28 @@ export default function Inquilinos() {
                               Ver cobranças
                             </button>
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleEncerrarContrato(inquilino.nome)
-                              }
-                            >
-                              Encerrar contrato
-                            </button>
+                            {isAdmin && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleEncerrarContrato(inquilino.nome)
+                                  }
+                                >
+                                  Encerrar contrato
+                                </button>
 
-                            <button
-                              type="button"
-                              className={styles.acaoPerigosa}
-                              onClick={() =>
-                                handleArquivarInquilino(inquilino.nome)
-                              }
-                            >
-                              Arquivar inquilino
-                            </button>
+                                <button
+                                  type="button"
+                                  className={styles.acaoPerigosa}
+                                  onClick={() =>
+                                    handleArquivarInquilino(inquilino.nome)
+                                  }
+                                >
+                                  Arquivar inquilino
+                                </button>
+                              </>
+                            )}
                           </div>
                         )}
                       </div>

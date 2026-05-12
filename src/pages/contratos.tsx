@@ -5,6 +5,7 @@ import styles from "../style/contratos.module.css";
 import { contratosMock } from "../data/contratosMock";
 import { getInquilinoById } from "../data/inquilinosMock";
 import ModalConfirmacao from "../components/modal"; 
+import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 
 export default function Contratos() {
   const [busca, setBusca] = useState("");
@@ -17,6 +18,7 @@ export default function Contratos() {
   const [contratoParaEncerrar, setContratoParaEncerrar] = useState<
     string | null
   >(null);
+  const isAdmin = usuarioLogadoMock.cargo === "admin";
 
   const contratosFiltrados = contratosMock.filter((contrato) => {
     const inquilino = getInquilinoById(contrato.inquilinoId);
@@ -39,7 +41,8 @@ export default function Contratos() {
   });
 
   const totalAtivos = contratosMock.filter(
-    (c) => c.status === "Ativo" || c.status === "Vence em breve",
+    (contrato) =>
+      contrato.status === "Ativo" || contrato.status === "Vence em breve"
   ).length;
   const totalVencemBreve = contratosMock.filter(
     (c) => c.status === "Vence em breve",
@@ -63,6 +66,13 @@ export default function Contratos() {
   const handleEncerrarContrato = (id: string) => {
     setContratoParaEncerrar(id);
     setIsModalOpen(true);
+    const confirmar = window.confirm(
+      `Tem certeza que deseja encerrar o contrato ${id}? Essa ação deve ser feita apenas por um administrador.`
+    );
+
+    if (!confirmar) return;
+
+    alert(`Contrato ${id} encerrado com sucesso.`);
     setMenuAberto(null);
   };
 
@@ -252,7 +262,8 @@ export default function Contratos() {
                             >
                               Enviar aviso
                             </button>
-                            {contrato.status !== "Encerrado" && (
+
+                            {isAdmin && contrato.status !== "Encerrado" && (
                               <button
                                 type="button"
                                 className={styles.acaoPerigosa}
