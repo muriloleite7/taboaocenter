@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../style/novoInquilino.module.css";
 
 export default function NovoInquilino() {
+  const navigate = useNavigate();
+  
   const [formData, setFormData] = useState({
     nome: "",
     cpf: "",
@@ -30,7 +33,7 @@ export default function NovoInquilino() {
     numero: "",
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     let formattedValue = value;
 
@@ -60,23 +63,46 @@ export default function NovoInquilino() {
   const handleSalvar = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log("Enviando dados:", formData);
+    // Cria o objeto do novo inquilino com base no form
+    const novoRegistro = {
+      id: Math.random().toString(36).substring(2, 11), // ID aleatório temporário
+      nome: formData.nome,
+      email: formData.email,
+      cpf: formData.cpf,
+      telefone: formData.telefone,
+      imovel: formData.imovel,
+      endereco: formData.rua ? `${formData.rua}, ${formData.numero} - ${formData.bairro}` : "",
+      aluguel: formData.aluguel,
+      vencimentoData: formData.dataInicio || new Date().toISOString(), // Usa dataInicio ou data atual
+      statusPagamento: "Adimplente",
+      statusContrato: "Ativo",
+    };
 
-    // Aqui entra a integração com o banco futuramente
+    // Pega a lista atual do localStorage (ou array vazio se não existir)
+    const listaAtual = JSON.parse(localStorage.getItem("@TaboaoCenter:inquilinos") || "[]");
+    
+    // Adiciona o novo registro no início da lista
+    const novaLista = [novoRegistro, ...listaAtual];
+    
+    // Salva a lista atualizada no localStorage
+    localStorage.setItem("@TaboaoCenter:inquilinos", JSON.stringify(novaLista));
+
+    alert("Inquilino cadastrado com sucesso!");
+    navigate("/inquilinos"); // Redireciona de volta para a lista
   };
 
   // Remove tudo que não é número e aplica a máscara de CPF
-  const maskCPF = (value) => {
+  const maskCPF = (value: string) => {
     return value
-      .replace(/\D/g, "") // Remove letras
-      .replace(/(\d{3})(\d)/, "$1.$2") // Coloca o primeiro ponto
-      .replace(/(\d{3})(\d)/, "$1.$2") // Coloca o segundo ponto
-      .replace(/(\d{3})(\d{1,2})$/, "$1-$2") // Coloca o hífen
-      .substring(0, 14); // Limita o tamanho
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .substring(0, 14);
   };
 
   // Máscara de Telefone (11) 99999-9999
-  const maskPhone = (value) => {
+  const maskPhone = (value: string) => {
     return value
       .replace(/\D/g, "")
       .replace(/(\d{2})(\d)/, "($1) $2")
@@ -84,12 +110,12 @@ export default function NovoInquilino() {
       .substring(0, 15);
   };
 
-  const checkCEP = (e) => {
+  const checkCEP = (e: React.FocusEvent<HTMLInputElement>) => {
     const cep = e.target.value.replace(/\D/g, "");
 
     if (cep === "") return;
-
     if (cep.length !== 8) return;
+
     fetch(`https://viacep.com.br/ws/${cep}/json/`)
       .then((res) => res.json())
       .then((data) => {
@@ -209,7 +235,7 @@ export default function NovoInquilino() {
               placeholder="00000-000"
               value={formData.cep}
               onChange={handleChange}
-              onBlur={checkCEP} // Busca quando o usuário clica fora do campo
+              onBlur={checkCEP}
             />
           </div>
 
@@ -410,7 +436,7 @@ export default function NovoInquilino() {
           <button
             type="button"
             className={styles.botaoVoltar}
-            onClick={() => window.history.back()}
+            onClick={() => navigate(-1)}
           >
             Cancelar
           </button>

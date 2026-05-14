@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Card from "../components/cards";
 import styles from "../style/inquilinos.module.css";
@@ -9,12 +9,27 @@ import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 export default function Inquilinos() {
   const navigate = useNavigate();
 
+  // Estado para armazenar os inquilinos que vêm do LocalStorage
+  const [listaInquilinos, setListaInquilinos] = useState<any[]>([]);
   const [busca, setBusca] = useState("");
   const [statusSelecionado, setStatusSelecionado] = useState("Todos");
   const [tipoImovelSelecionado, setTipoImovelSelecionado] = useState("Todos");
   const [menuAberto, setMenuAberto] = useState<string | null>(null);
 
   const isAdmin = usuarioLogadoMock.cargo === "admin";
+
+  // Carrega os dados do localStorage assim que a tela abre
+  useEffect(() => {
+    const salvos = localStorage.getItem("@TaboaoCenter:inquilinos");
+    
+    if (salvos) {
+      setListaInquilinos(JSON.parse(salvos));
+    } else {
+      // Se não tem nada no localStorage, salva o mock inicial lá
+      setListaInquilinos(inquilinosMock);
+      localStorage.setItem("@TaboaoCenter:inquilinos", JSON.stringify(inquilinosMock));
+    }
+  }, []);
 
   const getTipoImovel = (imovel: string) => {
     if (imovel.toLowerCase().includes("casa")) return "Casa";
@@ -31,7 +46,8 @@ export default function Inquilinos() {
     return statusPagamento;
   };
 
-  const inquilinosFiltrados = inquilinosMock.filter((inquilino) => {
+  // Filtra usando a lista do estado (listaInquilinos) em vez do mock direto
+  const inquilinosFiltrados = listaInquilinos.filter((inquilino) => {
     const statusTabela = getStatusTabela(inquilino.statusPagamento);
     const tipoImovel = getTipoImovel(inquilino.imovel);
 
@@ -56,17 +72,18 @@ export default function Inquilinos() {
     return bateBusca && bateStatus && bateTipo;
   });
 
-  const totalAtivos = inquilinosMock.length;
+  // Atualização dos totais usando a lista do estado
+  const totalAtivos = listaInquilinos.length;
 
-  const totalAdimplentes = inquilinosMock.filter(
+  const totalAdimplentes = listaInquilinos.filter(
     (inquilino) => getStatusTabela(inquilino.statusPagamento) === "Adimplente"
   ).length;
 
-  const totalPendentes = inquilinosMock.filter(
+  const totalPendentes = listaInquilinos.filter(
     (inquilino) => getStatusTabela(inquilino.statusPagamento) === "Com pendência"
   ).length;
 
-  const totalEncerrados = inquilinosMock.filter(
+  const totalEncerrados = listaInquilinos.filter(
     (inquilino) => inquilino.statusContrato === "Encerrado"
   ).length;
 
@@ -217,7 +234,7 @@ export default function Inquilinos() {
                       <div className={styles.avatarInquilino}>
                         {inquilino.nome
                           .split(" ")
-                          .map((parteNome) => parteNome[0])
+                          .map((parteNome: string) => parteNome[0])
                           .join("")
                           .slice(0, 2)}
                       </div>
@@ -333,7 +350,7 @@ export default function Inquilinos() {
 
         <div className={styles.rodapeTabela}>
           <span>
-            Mostrando {inquilinosFiltrados.length} de {inquilinosMock.length}{" "}
+            Mostrando {inquilinosFiltrados.length} de {listaInquilinos.length}{" "}
             inquilinos
           </span>
 
