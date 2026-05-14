@@ -1,3 +1,14 @@
+.home {
+  width: 100%;
+}
+
+.headerHome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
 .tituloHome {
   font-size: 32px;
   color: #111827;
@@ -6,12 +17,6 @@
 .subtituloHome {
   color: #64748b;
   margin-top: 6px;
-}
-
-.headerHome {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .novoInquilino {
@@ -23,21 +28,117 @@
   cursor: pointer;
   font-size: 16px;
   min-width: 200px;
+  white-space: nowrap;
 }
 
 .novoInquilino:hover {
-  background: linear-gradient(135deg, #4338ca, #4f46e5); 
+  background: linear-gradient(135deg, #4338ca, #4f46e5);
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
-.cardsHome {
-  display: flex;
-  gap: 40px;
-  margin-top: 50px;
+.sectionHome {
+  margin-top: 70px;
 }
 
 .tituloCards {
   font-size: 28px;
-  margin-top: 70px;
+  color: #111827;
   margin-bottom: 28px;
+}
+
+.cardsHome {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.cardsHome > * {
+  min-width: 0;
+  width: 100%;
+}
+
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.cardLink > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.cardLink:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease;
+}
+
+/* Aqui é o ajuste principal: antes de esmagar, vira 2 colunas */
+@media (max-width: 1500px) {
+  .cardsHome {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+/* Tablet / celular grande */
+@media (max-width: 768px) {
+  .headerHome {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tituloHome {
+    font-size: 28px;
+  }
+
+  .subtituloHome {
+    font-size: 15px;
+  }
+
+  .novoInquilino {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .sectionHome {
+    margin-top: 46px;
+  }
+
+  .tituloCards {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .cardsHome {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+/* Celular pequeno */
+@media (max-width: 420px) {
+  .tituloHome {
+    font-size: 26px;
+  }
+
+  .subtituloHome {
+    font-size: 14px;
+  }
+
+  .novoInquilino {
+    padding: 13px 20px;
+    font-size: 15px;
+  }
+
+  .sectionHome {
+    margin-top: 38px;
+  }
+
+  .tituloCards {
+    font-size: 22px;
+  }
 }
