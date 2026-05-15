@@ -1,7 +1,12 @@
+.contratos {
+  width: 100%;
+}
+
 .headerContratos {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
   margin-bottom: 24px;
 }
 
@@ -24,19 +29,28 @@
   cursor: pointer;
   font-size: 16px;
   min-width: 200px;
+  white-space: nowrap;
 }
 
 .novoContrato:hover {
-  background: linear-gradient(135deg, #4338ca, #4f46e5); 
+  background: linear-gradient(135deg, #4338ca, #4f46e5);
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
+/* Cards responsivos */
 .cardsContratos {
-  display: flex;
-  gap: 40px;
-  margin-top: 90px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 70px;
 }
 
+.cardsContratos > * {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Filtros */
 .filtrosContratos {
   width: 100%;
   background-color: #ffffff;
@@ -48,12 +62,14 @@
   display: flex;
   align-items: flex-end;
   gap: 18px;
+  flex-wrap: wrap;
 
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
 }
 
 .searchBox {
-  width: 360px;
+  flex: 1;
+  min-width: 280px;
   height: 46px;
   border: 1px solid #d8dee8;
   border-radius: 8px;
@@ -68,6 +84,7 @@
 .searchIcon {
   color: #64748b;
   font-size: 18px;
+  flex-shrink: 0;
 }
 
 .searchInput {
@@ -77,6 +94,7 @@
   color: #0f172a;
   font-size: 14px;
   background: transparent;
+  min-width: 0;
 }
 
 .searchInput::placeholder {
@@ -118,23 +136,29 @@
   font-weight: 600;
   cursor: pointer;
   margin-left: auto;
+  white-space: nowrap;
 }
 
 .exportButton:hover {
   background-color: #f8fafc;
 }
 
+/* Tabela */
 .tabelaContainer {
   background-color: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   margin-top: 26px;
-  overflow: visible;
+
+  overflow-x: auto;
+  overflow-y: visible;
+
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
 }
 
 .tabelaContratos {
   width: 100%;
+  min-width: 1080px;
   border-collapse: collapse;
 }
 
@@ -149,6 +173,7 @@
   color: #64748b;
   font-weight: 700;
   border-bottom: 1px solid #e5e7eb;
+  white-space: nowrap;
 }
 
 .tabelaContratos td {
@@ -179,6 +204,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
+  flex-shrink: 0;
 }
 
 .infoContrato strong,
@@ -324,6 +350,7 @@
 .menuAcoes .acaoPerigosa:hover {
   background-color: #fee2e2;
 }
+
 .semResultados {
   text-align: center;
   color: #64748b;
@@ -335,6 +362,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 
 .rodapeTabela span {
@@ -367,4 +395,101 @@
   background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
   color: #ffffff !important;
   border: none !important;
+}
+
+/* Notebook menor */
+@media (max-width: 1500px) {
+  .cardsContratos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .cardsContratos {
+    margin-top: 46px;
+  }
+
+  .filtrosContratos {
+    align-items: stretch;
+  }
+
+  .searchBox {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .filterGroup {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .selectFilter {
+    width: 100%;
+  }
+
+  .exportButton {
+    margin-left: 0;
+  }
+}
+
+/* Celular */
+@media (max-width: 768px) {
+  .headerContratos {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tituloContratos {
+    font-size: 28px;
+  }
+
+  .subtituloContratos {
+    font-size: 15px;
+  }
+
+  .novoContrato {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cardsContratos {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .filtrosContratos {
+    padding: 18px;
+  }
+
+  .filterGroup {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .exportButton {
+    width: 100%;
+  }
+
+  .rodapeTabela {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Celular pequeno */
+@media (max-width: 420px) {
+  .tituloContratos {
+    font-size: 26px;
+  }
+
+  .novoContrato {
+    padding: 13px 20px;
+    font-size: 15px;
+  }
+
+  .tabelaContratos {
+    min-width: 980px;
+  }
 }

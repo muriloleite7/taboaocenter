@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   formatarTipoDespesa,
   getInquilinoById,
@@ -11,8 +11,20 @@ import {
 } from "../data/cobrancasMock";
 import styles from "../style/detalheInquilino.module.css";
 
+type LocationState = {
+  voltarPara?: string;
+  textoVoltar?: string;
+};
+
 export default function DetalheInquilino() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const state = location.state as LocationState | null;
+
+  const rotaVoltar = state?.voltarPara || "/inquilinos";
+  const textoVoltar = state?.textoVoltar || "← Voltar para inquilinos";
 
   const inquilino = getInquilinoById(id);
   const cobrancasDoInquilino = getCobrancasByInquilinoId(id);
@@ -33,15 +45,26 @@ export default function DetalheInquilino() {
     <div className={styles.detalheInquilino}>
       <div className={styles.headerDetalhe}>
         <div>
-          <Link to="/inquilinos" className={styles.voltarLink}>
-            ← Voltar para inquilinos
-          </Link>
+          <button
+            type="button"
+            className={styles.voltarButton}
+            onClick={() => navigate(rotaVoltar)}
+          >
+            {textoVoltar}
+          </button>
 
           <h1>{inquilino.nome}</h1>
           <p>Detalhes completos do inquilino, contrato e cobranças.</p>
         </div>
 
-        <Link to={`/inquilinos/${id}/editar`} className={styles.editarButton}>
+        <Link
+          to={`/inquilinos/${id}/editar`}
+          state={{
+            voltarPara: rotaVoltar,
+            textoVoltar,
+          }}
+          className={styles.editarButton}
+        >
           Editar inquilino
         </Link>
       </div>

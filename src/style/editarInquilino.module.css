@@ -6,6 +6,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
 }
 
 .voltarLink {
@@ -58,7 +59,7 @@
 
 .gridCampos {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
   margin-bottom: 40px;
 }
@@ -74,6 +75,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
 .campoFull {
@@ -95,6 +97,7 @@
   font-size: 16px;
   background: #fcfcfd;
   transition: all 0.2s ease;
+  min-width: 0;
 }
 
 .inputForm:focus {
@@ -119,7 +122,10 @@
 .campoAjuda {
   color: #64748b;
   font-size: 12px;
+  line-height: 1.4;
 }
+
+/* DESPESAS DO CONTRATO */
 
 .despesasCard {
   margin-top: 34px;
@@ -128,16 +134,23 @@
   border-top: 1px solid #f1f5f9;
 }
 
+.despesasCard .secaoTitulo {
+  display: block;
+  margin-bottom: 6px;
+}
+
 .textoAjuda {
   color: #64748b;
   font-size: 14px;
   margin-bottom: 24px;
+  line-height: 1.5;
 }
 
 .despesaLinha {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 220px 180px;
+  align-items: center;
+  gap: 20px;
   padding: 18px 0;
   border-bottom: 1px solid #f1f5f9;
 }
@@ -156,7 +169,7 @@
   color: #111827;
   font-size: 16px;
   font-weight: 600;
-  margin: 0;
+  margin: 0 0 4px 0;
 }
 
 .selectForm {
@@ -169,6 +182,7 @@
   background-color: #fcfcfd;
   color: #111827;
   cursor: pointer;
+  min-width: 0;
 }
 
 .selectForm:focus {
@@ -186,6 +200,7 @@
   border-radius: 8px;
   font-size: 15px;
   background-color: #fcfcfd;
+  min-width: 0;
 }
 
 .inputDespesa:focus {
@@ -194,6 +209,8 @@
   background-color: white;
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
+
+/* BOTÕES */
 
 .areaBotoes {
   display: flex;
@@ -227,4 +244,139 @@
 .botaoSalvar:hover,
 .botaoVoltar:hover {
   opacity: 0.9;
+}
+
+/* NOTEBOOK / TELA MÉDIA */
+
+@media (max-width: 1100px) {
+  .formularioCard {
+    padding: 32px;
+  }
+
+  .secaoTitulo {
+    font-size: 28px;
+  }
+
+  .despesaLinha {
+    grid-template-columns: minmax(160px, 1fr) 200px 160px;
+  }
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+  .formularioCard {
+    padding: 28px;
+  }
+
+  .gridCampos {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+
+  .secaoTitulo {
+    grid-column: span 1;
+    font-size: 26px;
+  }
+
+  .campoFull {
+    grid-column: span 1;
+  }
+
+  .despesaLinha {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: 12px;
+    padding: 20px 0;
+  }
+
+  .selectForm,
+  .inputDespesa {
+    width: 100%;
+  }
+}
+
+/* CELULAR */
+
+@media (max-width: 768px) {
+  .containerEditar {
+    padding-top: 12px;
+  }
+
+  .headerEditar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tituloEditar {
+    font-size: 28px;
+  }
+
+  .subtituloEditar {
+    font-size: 15px;
+  }
+
+  .avisoEdicao {
+    padding: 15px;
+  }
+
+  .formularioCard {
+    padding: 22px;
+    border-radius: 14px;
+  }
+
+  .secaoTitulo {
+    font-size: 24px;
+  }
+
+  .inputForm {
+    height: 46px;
+    font-size: 15px;
+  }
+
+  .despesasCard {
+    margin-top: 28px;
+    margin-bottom: 34px;
+  }
+
+  .areaBotoes {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .botaoVoltar,
+  .botaoSalvar {
+    width: 100%;
+    padding: 13px 20px;
+  }
+}
+
+/* CELULAR PEQUENO */
+
+@media (max-width: 420px) {
+  .tituloEditar {
+    font-size: 26px;
+  }
+
+  .subtituloEditar {
+    font-size: 14px;
+  }
+
+  .formularioCard {
+    padding: 18px;
+  }
+
+  .secaoTitulo {
+    font-size: 22px;
+  }
+
+  .textoAjuda,
+  .avisoEdicao p {
+    font-size: 13px;
+  }
+
+  .despesaTitulo {
+    font-size: 16px;
+  }
 }

@@ -247,10 +247,10 @@ export default function Cobrancas() {
                         cobranca.status === "Paga"
                           ? styles.statusPago
                           : cobranca.status === "Atrasada"
-                          ? styles.statusAtrasado
-                          : cobranca.status === "Despesas pendentes"
-                          ? styles.statusDespesas
-                          : styles.statusPendente
+                            ? styles.statusAtrasado
+                            : cobranca.status === "Despesas pendentes"
+                              ? styles.statusDespesas
+                              : styles.statusPendente
                       }
                     >
                       <span className={styles.statusText}>
@@ -263,6 +263,10 @@ export default function Cobrancas() {
                     <div className={styles.acoesTabela}>
                       <Link
                         to={`/inquilinos/${inquilino.id}`}
+                        state={{
+                          voltarPara: "/cobrancas",
+                          textoVoltar: "← Voltar para cobranças",
+                        }}
                         className={styles.botaoAcao}
                         title="Ver detalhes do inquilino"
                       >

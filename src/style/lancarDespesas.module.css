@@ -6,6 +6,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
 }
 
 .tituloDespesas {
@@ -40,13 +41,13 @@
 
 .gridTres {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: minmax(260px, 1.4fr) minmax(160px, 1fr) minmax(160px, 1fr);
   gap: 24px;
 }
 
 .gridQuatro {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
   margin-bottom: 24px;
 }
@@ -55,6 +56,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
 .campoGrupo label {
@@ -72,6 +74,7 @@
   background-color: #fcfcfd;
   color: #111827;
   transition: all 0.2s ease;
+  min-width: 0;
 }
 
 .inputForm {
@@ -98,6 +101,14 @@
   color: #6b7280;
   cursor: not-allowed;
 }
+
+.inputDisabled:focus {
+  border-color: #d1d5db;
+  background-color: #f3f4f6;
+  box-shadow: none;
+}
+
+/* Busca de inquilino */
 
 .buscaWrapper {
   position: relative;
@@ -149,10 +160,12 @@
   color: #64748b;
 }
 
+/* Inquilino selecionado */
+
 .inquilinoSelecionado {
   margin-top: 24px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
   background-color: #f8fafc;
   border: 1px solid #e5e7eb;
@@ -170,11 +183,14 @@
 .inquilinoSelecionado h3 {
   font-size: 15px;
   color: #111827;
+  overflow-wrap: anywhere;
 }
+
+/* Resumo */
 
 .resumoGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
 }
 
@@ -183,6 +199,7 @@
   border-radius: 14px;
   padding: 20px;
   background-color: #ffffff;
+  min-width: 0;
 }
 
 .resumoCard span {
@@ -195,6 +212,7 @@
 .resumoCard h3 {
   font-size: 20px;
   color: #111827;
+  overflow-wrap: anywhere;
 }
 
 .statusPendente {
@@ -205,6 +223,8 @@
   color: #c2410c !important;
   font-size: 14px !important;
 }
+
+/* Botões */
 
 .areaBotoes {
   display: flex;
@@ -235,4 +255,115 @@
 .botaoSalvar:hover,
 .botaoCancelar:hover {
   opacity: 0.9;
+}
+
+/* NOTEBOOK / TELA MÉDIA */
+
+@media (max-width: 1200px) {
+  .formularioCard {
+    padding: 32px;
+  }
+
+  .gridQuatro,
+  .resumoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+  .formularioCard {
+    padding: 28px;
+  }
+
+  .gridTres {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .inquilinoSelecionado {
+    grid-template-columns: 1fr;
+  }
+
+  .listaResultados {
+    position: static;
+    margin-top: 8px;
+  }
+}
+
+/* CELULAR */
+
+@media (max-width: 768px) {
+  .headerDespesas {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tituloDespesas {
+    font-size: 28px;
+  }
+
+  .subtituloDespesas {
+    font-size: 15px;
+  }
+
+  .formularioCard {
+    padding: 22px;
+    border-radius: 14px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+
+  .gridQuatro,
+  .resumoGrid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .inputForm {
+    height: 46px;
+  }
+
+  .areaBotoes {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .botaoCancelar,
+  .botaoSalvar {
+    width: 100%;
+    padding: 13px 20px;
+  }
+}
+
+/* CELULAR PEQUENO */
+
+@media (max-width: 420px) {
+  .tituloDespesas {
+    font-size: 26px;
+  }
+
+  .subtituloDespesas {
+    font-size: 14px;
+  }
+
+  .formularioCard {
+    padding: 18px;
+  }
+
+  .section {
+    padding-bottom: 28px;
+    margin-bottom: 28px;
+  }
+
+  .sectionTitle {
+    font-size: 19px;
+  }
+
+  .resumoCard {
+    padding: 18px;
+  }
 }

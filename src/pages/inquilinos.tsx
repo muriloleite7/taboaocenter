@@ -21,7 +21,7 @@ export default function Inquilinos() {
   // Carrega os dados do localStorage assim que a tela abre
   useEffect(() => {
     const salvos = localStorage.getItem("@TaboaoCenter:inquilinos");
-    
+
     if (salvos) {
       setListaInquilinos(JSON.parse(salvos));
     } else {
@@ -275,6 +275,10 @@ export default function Inquilinos() {
                     <div className={styles.acoesTabela}>
                       <Link
                         to={`/inquilinos/${inquilino.id}`}
+                        state={{
+                          voltarPara: "/inquilinos",
+                          textoVoltar: "← Voltar para inquilinos",
+                        }}
                         className={styles.botaoAcao}
                         title="Ver detalhes"
                       >

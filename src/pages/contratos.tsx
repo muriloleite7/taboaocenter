@@ -4,7 +4,7 @@ import Card from "../components/cards";
 import styles from "../style/contratos.module.css";
 import { contratosMock } from "../data/contratosMock";
 import { getInquilinoById } from "../data/inquilinosMock";
-import ModalConfirmacao from "../components/modal"; 
+import ModalConfirmacao from "../components/modal";
 import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 
 export default function Contratos() {
@@ -66,13 +66,6 @@ export default function Contratos() {
   const handleEncerrarContrato = (id: string) => {
     setContratoParaEncerrar(id);
     setIsModalOpen(true);
-    const confirmar = window.confirm(
-      `Tem certeza que deseja encerrar o contrato ${id}? Essa ação deve ser feita apenas por um administrador.`
-    );
-
-    if (!confirmar) return;
-
-    alert(`Contrato ${id} encerrado com sucesso.`);
     setMenuAberto(null);
   };
 
