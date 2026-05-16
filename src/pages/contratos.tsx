@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Card from "../components/cards";
 import styles from "../style/contratos.module.css";
 import { contratosMock } from "../data/contratosMock";
@@ -8,6 +8,7 @@ import ModalConfirmacao from "../components/modal";
 import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 
 export default function Contratos() {
+  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [statusSelecionado, setStatusSelecionado] = useState("Todos");
   const [periodoSelecionado, setPeriodoSelecionado] = useState("Todos");
@@ -86,7 +87,10 @@ export default function Contratos() {
             Controle os contratos, vencimentos e renovações da imobiliária.
           </p>
         </div>
-        <button className={styles.novoContrato}>+ Novo contrato</button>
+
+        <button onClick={() => navigate("/novo-contrato")} className={styles.novoContrato}>
+          + Novo contrato
+        </button>
       </div>
 
       <div className={styles.cardsContratos}>
