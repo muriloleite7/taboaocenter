@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Card from "../components/cards";
 import styles from "../style/contratos.module.css";
-import { contratosMock } from "../data/contratosMock";
-import { getInquilinoById } from "../data/inquilinosMock";
 import ModalConfirmacao from "../components/modal";
 import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
+import { contratosMock } from "../data/contratosMock";
+import { inquilinosMock } from "../data/inquilinosMock";
 
 export default function Contratos() {
   const navigate = useNavigate();
@@ -14,46 +14,52 @@ export default function Contratos() {
   const [periodoSelecionado, setPeriodoSelecionado] = useState("Todos");
   const [menuAberto, setMenuAberto] = useState<string | null>(null);
 
-  // ESTADOS DO MODAL
+  // ESTADOS DO MODAL E USUÁRIO
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [contratoParaEncerrar, setContratoParaEncerrar] = useState<
-    string | null
-  >(null);
+  const [contratoParaEncerrar, setContratoParaEncerrar] = useState<string | null>(null);
   const isAdmin = usuarioLogadoMock.cargo === "admin";
 
-  const contratosFiltrados = contratosMock.filter((contrato) => {
-    const inquilino = getInquilinoById(contrato.inquilinoId);
+  // 1. CARREGANDO CONTRATOS DO LOCALSTORAGE
+  const [listaContratos] = useState(() => {
+    const salvos = localStorage.getItem("@TaboaoCenter:contratos");
+    if (salvos) return JSON.parse(salvos);
+    
+    // Se não tiver nada salvo, inicia com o mock e já salva
+    localStorage.setItem("@TaboaoCenter:contratos", JSON.stringify(contratosMock));
+    return contratosMock;
+  });
+
+  // 2. CARREGANDO INQUILINOS DO LOCALSTORAGE (para cruzar os dados corretamente)
+  const [listaInquilinos] = useState(() => {
+    const salvos = localStorage.getItem("@TaboaoCenter:inquilinos");
+    return salvos ? JSON.parse(salvos) : inquilinosMock;
+  });
+
+  // 3. ATUALIZANDO OS CONTADORES DOS CARDS PARA USAR A LISTA DINÂMICA
+  const totalAtivos = listaContratos.filter(
+    (c: any) => c.status === "Ativo" || c.status === "Vence em breve"
+  ).length;
+  const totalVencemBreve = listaContratos.filter((c: any) => c.status === "Vence em breve").length;
+  const totalRenovacao = listaContratos.filter((c: any) => c.status === "Renovação pendente").length;
+  const totalEncerrados = listaContratos.filter((c: any) => c.status === "Encerrado").length;
+
+  // 4. ATUALIZANDO O FILTRO PARA USAR A LISTA DINÂMICA E BUSCAR O INQUILINO NO STATE
+  const contratosFiltrados = listaContratos.filter((contrato: any) => {
+    const inquilino = listaInquilinos.find((i: any) => i.id === contrato.inquilinoId);
     if (!inquilino) return false;
 
-    const textoBusca =
-      `${inquilino.nome} ${inquilino.email} ${inquilino.cpf} ${inquilino.imovel} ${inquilino.endereco} ${contrato.status} ${contrato.inicio} ${contrato.fim}`.toLowerCase();
+    const textoBusca = `${inquilino.nome} ${inquilino.email} ${inquilino.cpf} ${inquilino.imovel} ${inquilino.endereco} ${contrato.status} ${contrato.inicio} ${contrato.fim}`.toLowerCase();
+    
     const bateBusca = textoBusca.includes(busca.toLowerCase());
-    const bateStatus =
-      statusSelecionado === "Todos" || contrato.status === statusSelecionado;
+    const bateStatus = statusSelecionado === "Todos" || contrato.status === statusSelecionado;
     const batePeriodo =
       periodoSelecionado === "Todos" ||
-      (periodoSelecionado === "Próximos 30 dias" &&
-        contrato.status === "Vence em breve") ||
-      (periodoSelecionado === "Próximos 60 dias" &&
-        contrato.status !== "Encerrado") ||
+      (periodoSelecionado === "Próximos 30 dias" && contrato.status === "Vence em breve") ||
+      (periodoSelecionado === "Próximos 60 dias" && contrato.status !== "Encerrado") ||
       (periodoSelecionado === "Este mês" && contrato.status !== "Encerrado");
 
     return bateBusca && bateStatus && batePeriodo;
   });
-
-  const totalAtivos = contratosMock.filter(
-    (contrato) =>
-      contrato.status === "Ativo" || contrato.status === "Vence em breve"
-  ).length;
-  const totalVencemBreve = contratosMock.filter(
-    (c) => c.status === "Vence em breve",
-  ).length;
-  const totalRenovacao = contratosMock.filter(
-    (c) => c.status === "Renovação pendente",
-  ).length;
-  const totalEncerrados = contratosMock.filter(
-    (c) => c.status === "Encerrado",
-  ).length;
 
   const alternarMenu = (id: string) => {
     setMenuAberto((menuAtual) => (menuAtual === id ? null : id));
@@ -71,9 +77,7 @@ export default function Contratos() {
   };
 
   const confirmarEncerramentoTabela = () => {
-    alert(
-      `O contrato ${contratoParaEncerrar} foi marcado como encerrado! (Futuro back-end)`,
-    );
+    alert(`O contrato ${contratoParaEncerrar} foi marcado como encerrado! (Futuro back-end)`);
     setIsModalOpen(false);
     setContratoParaEncerrar(null);
   };
@@ -94,26 +98,10 @@ export default function Contratos() {
       </div>
 
       <div className={styles.cardsContratos}>
-        <Card
-          title="Contratos ativos"
-          value={totalAtivos}
-          description="Em andamento"
-        />
-        <Card
-          title="Vencem em 30 dias"
-          value={totalVencemBreve}
-          description="Precisam de atenção"
-        />
-        <Card
-          title="Renovação pendente"
-          value={totalRenovacao}
-          description="Aguardando retorno"
-        />
-        <Card
-          title="Encerrados"
-          value={totalEncerrados}
-          description="Contratos finalizados"
-        />
+        <Card title="Contratos ativos" value={totalAtivos} description="Em andamento" />
+        <Card title="Vencem em 30 dias" value={totalVencemBreve} description="Precisam de atenção" />
+        <Card title="Renovação pendente" value={totalRenovacao} description="Aguardando retorno" />
+        <Card title="Encerrados" value={totalEncerrados} description="Contratos finalizados" />
       </div>
 
       <div className={styles.filtrosContratos}>
@@ -174,8 +162,8 @@ export default function Contratos() {
             </tr>
           </thead>
           <tbody>
-            {contratosFiltrados.map((contrato) => {
-              const inquilino = getInquilinoById(contrato.inquilinoId);
+            {contratosFiltrados.map((contrato: any) => {
+              const inquilino = listaInquilinos.find((i: any) => i.id === contrato.inquilinoId);
               if (!inquilino) return null;
 
               return (
@@ -185,7 +173,7 @@ export default function Contratos() {
                       <div className={styles.avatarContrato}>
                         {inquilino.nome
                           .split(" ")
-                          .map((parteNome) => parteNome[0])
+                          .map((parteNome: string) => parteNome[0])
                           .join("")
                           .slice(0, 2)}
                       </div>
@@ -264,9 +252,7 @@ export default function Contratos() {
                               <button
                                 type="button"
                                 className={styles.acaoPerigosa}
-                                onClick={() =>
-                                  handleEncerrarContrato(contrato.id)
-                                }
+                                onClick={() => handleEncerrarContrato(contrato.id)}
                               >
                                 Encerrar contrato
                               </button>
@@ -291,8 +277,7 @@ export default function Contratos() {
 
         <div className={styles.rodapeTabela}>
           <span>
-            Mostrando {contratosFiltrados.length} de {contratosMock.length}{" "}
-            contratos
+            Mostrando {contratosFiltrados.length} de {listaContratos.length} contratos
           </span>
           <div className={styles.paginacao}>
             <button>{"<"}</button>

@@ -1,14 +1,6 @@
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
-import {
-  formatarTipoDespesa,
-  getInquilinoById,
-} from "../data/inquilinosMock";
-import {
-  calcularMultaAutomatica,
-  calcularSubtotal,
-  formatarMoeda,
-  getCobrancasByInquilinoId,
-} from "../data/cobrancasMock";
+import { formatarTipoDespesa, getInquilinoById, } from "../data/inquilinosMock";
+import { calcularMultaAutomatica, calcularSubtotal, formatarMoeda, getCobrancasByInquilinoId, } from "../data/cobrancasMock";
 import styles from "../style/detalheInquilino.module.css";
 
 type LocationState = {

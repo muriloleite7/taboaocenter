@@ -1,18 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Card from "../components/cards";
 import styles from "../style/cobrancas.module.css";
 import { Link } from "react-router-dom";
-import { getInquilinoById } from "../data/inquilinosMock";
-import {
-  calcularMultaAutomatica,
-  calcularSubtotal,
-  cobrancasMock,
-  formatarData,
-  formatarMoeda,
-} from "../data/cobrancasMock";
+import { inquilinosMock } from "../data/inquilinosMock";
+import { calcularMultaAutomatica, calcularSubtotal, cobrancasMock, formatarData, formatarMoeda, } from "../data/cobrancasMock";
 import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 
 export default function Cobrancas() {
+  const [listaCobrancas, setListaCobrancas] = useState(() => {
+    const salvas = localStorage.getItem("@TaboaoCenter:cobrancas");
+    if (salvas) {
+      return JSON.parse(salvas);
+    }
+    localStorage.setItem(
+      "@TaboaoCenter:cobrancas",
+      JSON.stringify(cobrancasMock),
+    );
+    return cobrancasMock;
+  });
+
+  const [listaInquilinos] = useState(() => {
+    const salvos = localStorage.getItem("@TaboaoCenter:inquilinos");
+    return salvos ? JSON.parse(salvos) : inquilinosMock;
+  });
+
   const [busca, setBusca] = useState("");
   const [statusSelecionado, setStatusSelecionado] = useState("Todos");
   const [referenciaSelecionada, setReferenciaSelecionada] = useState("Todos");
@@ -20,8 +31,8 @@ export default function Cobrancas() {
 
   const isAdmin = usuarioLogadoMock.cargo === "admin";
 
-  const cobrancasFiltradas = cobrancasMock.filter((cobranca) => {
-    const inquilino = getInquilinoById(cobranca.inquilinoId);
+  const cobrancasFiltradas = listaCobrancas.filter((cobranca: any) => {
+    const inquilino = listaInquilinos.find((i: any) => i.id === cobranca.inquilinoId);
 
     if (!inquilino) return false;
 
@@ -46,16 +57,16 @@ export default function Cobrancas() {
     return bateBusca && bateStatus && bateReferencia;
   });
 
-  const totalPendentes = cobrancasMock.filter(
-    (cobranca) => cobranca.status === "Pendente"
+  const totalPendentes = listaCobrancas.filter(
+    (cobranca: any) => cobranca.status === "Pendente",
   ).length;
 
-  const totalAtrasadas = cobrancasMock.filter(
-    (cobranca) => cobranca.status === "Atrasada"
+  const totalAtrasadas = listaCobrancas.filter(
+    (cobranca: any) => cobranca.status === "Atrasada",
   ).length;
 
-  const totalDespesasPendentes = cobrancasMock.filter(
-    (cobranca) => cobranca.status === "Despesas pendentes"
+  const totalDespesasPendentes = listaCobrancas.filter(
+    (cobranca: any) => cobranca.status === "Despesas pendentes",
   ).length;
 
   const alternarMenu = (id: string) => {
@@ -63,16 +74,25 @@ export default function Cobrancas() {
   };
 
   const handleReenviarCobranca = (nome: string) => {
-    alert(`Aqui futuramente será reenviada a cobrança para ${nome} no WhatsApp.`);
+    alert(
+      `Aqui futuramente será reenviada a cobrança para ${nome} no WhatsApp.`,
+    );
     setMenuAberto(null);
   };
 
   const handleCancelarCobranca = (id: string) => {
     const confirmar = window.confirm(
-      `Tem certeza que deseja cancelar a cobrança ${id}? Essa ação deve ser feita apenas por um administrador.`
+      `Tem certeza que deseja cancelar a cobrança ${id}? Essa ação deve ser feita apenas por um administrador.`,
     );
 
     if (!confirmar) return;
+
+    const atualizadas = listaCobrancas.filter((c: any) => c.id !== id);
+    setListaCobrancas(atualizadas);
+    localStorage.setItem(
+      "@TaboaoCenter:cobrancas",
+      JSON.stringify(atualizadas),
+    );
 
     alert(`Cobrança ${id} cancelada com sucesso.`);
     setMenuAberto(null);
@@ -186,8 +206,8 @@ export default function Cobrancas() {
           </thead>
 
           <tbody>
-            {cobrancasFiltradas.map((cobranca) => {
-              const inquilino = getInquilinoById(cobranca.inquilinoId);
+            {cobrancasFiltradas.map((cobranca: any) => {
+              const inquilino = listaInquilinos.find((i: any) => i.id === cobranca.inquilinoId);
               const subtotal = calcularSubtotal(cobranca);
               const multa = calcularMultaAutomatica(cobranca.status, subtotal);
               const total = subtotal + multa;
@@ -201,7 +221,7 @@ export default function Cobrancas() {
                       <div className={styles.avatarCobranca}>
                         {inquilino.nome
                           .split(" ")
-                          .map((parteNome) => parteNome[0])
+                          .map((parteNome: string) => parteNome[0])
                           .join("")
                           .slice(0, 2)}
                       </div>
@@ -340,7 +360,7 @@ export default function Cobrancas() {
 
         <div className={styles.rodapeTabela}>
           <span>
-            Mostrando {cobrancasFiltradas.length} de {cobrancasMock.length}{" "}
+            Mostrando {cobrancasFiltradas.length} de {listaCobrancas.length}{" "}
             cobranças
           </span>
 

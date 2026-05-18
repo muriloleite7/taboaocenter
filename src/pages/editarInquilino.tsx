@@ -1,60 +1,91 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { getInquilinoById } from "../data/inquilinosMock";
 import styles from "../style/editarInquilino.module.css";
 
 export default function EditarInquilino() {
   const { id } = useParams();
-
-  const inquilinoEncontrado = getInquilinoById(id);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [existeInquilino, setExisteInquilino] = useState(true);
 
   const [formData, setFormData] = useState({
-    nome: inquilinoEncontrado?.nome || "",
-    cpf: inquilinoEncontrado?.cpf || "",
-    telefone: inquilinoEncontrado?.telefone || "",
-    email: inquilinoEncontrado?.email || "",
-    imovel: inquilinoEncontrado?.imovel || "",
-    aluguel: inquilinoEncontrado?.aluguel || "",
-    vencimento: inquilinoEncontrado?.diaVencimento || "",
-    dataInicio: inquilinoEncontrado?.dataInicio || "",
-    dataFim: inquilinoEncontrado?.dataFim || "",
-
-    aguaTipo: inquilinoEncontrado?.aguaTipo || "variavel",
-    aguaValor: inquilinoEncontrado?.aguaValor || "",
-
-    luzTipo: inquilinoEncontrado?.luzTipo || "variavel",
-    luzValor: inquilinoEncontrado?.luzValor || "",
-
-    iptuTipo: inquilinoEncontrado?.iptuTipo || "variavel",
-    iptuValor: inquilinoEncontrado?.iptuValor || "",
+    nome: "",
+    cpf: "",
+    telefone: "",
+    email: "",
+    imovel: "",
+    aluguel: "",
+    vencimento: "",
+    dataInicio: "",
+    dataFim: "",
+    aguaTipo: "variavel",
+    aguaValor: "",
+    luzTipo: "variavel",
+    luzValor: "",
+    iptuTipo: "variavel",
+    iptuValor: "",
   });
+
+  useEffect(() => {
+    const inquilinosSalvos = JSON.parse(localStorage.getItem("inquilinos_db") || "{}");
+
+    if (inquilinosSalvos[id!]) {
+      setFormData(inquilinosSalvos[id!]);
+    } else {
+      const inquilinoMock = getInquilinoById(id);
+      if (inquilinoMock) {
+        setFormData({
+          nome: inquilinoMock.nome || "",
+          cpf: inquilinoMock.cpf || "",
+          telefone: inquilinoMock.telefone || "",
+          email: inquilinoMock.email || "",
+          imovel: inquilinoMock.imovel || "",
+          aluguel: inquilinoMock.aluguel || "",
+          vencimento: inquilinoMock.diaVencimento || "",
+          dataInicio: inquilinoMock.dataInicio || "",
+          dataFim: inquilinoMock.dataFim || "",
+          aguaTipo: inquilinoMock.aguaTipo || "variavel",
+          aguaValor: inquilinoMock.aguaValor || "",
+          luzTipo: inquilinoMock.luzTipo || "variavel",
+          luzValor: inquilinoMock.luzValor || "",
+          iptuTipo: inquilinoMock.iptuTipo || "variavel",
+          iptuValor: inquilinoMock.iptuValor || "",
+        });
+      } else {
+        setExisteInquilino(false);
+      }
+    }
+    setLoading(false);
+  }, [id]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSalvar = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log("Dados atualizados:", {
-      id,
-      ...formData,
-    });
+    const inquilinosSalvos = JSON.parse(localStorage.getItem("inquilinos_db") || "{}");
+    inquilinosSalvos[id!] = { ...formData, id };
+    localStorage.setItem("inquilinos_db", JSON.stringify(inquilinosSalvos));
+
+    alert("Inquilino atualizado com sucesso!");
+    navigate(`/inquilinos/${id}`); 
   };
 
-  if (!inquilinoEncontrado) {
+  if (loading) {
+    return <div className={styles.containerEditar}><h1>Carregando dados...</h1></div>;
+  }
+
+  if (!existeInquilino) {
     return (
       <div className={styles.containerEditar}>
         <h1>Inquilino não encontrado</h1>
-
         <Link to="/inquilinos" className={styles.voltarLink}>
           Voltar para inquilinos
         </Link>
@@ -69,12 +100,9 @@ export default function EditarInquilino() {
           <Link to={`/inquilinos/${id}`} className={styles.voltarLink}>
             ← Voltar para detalhes
           </Link>
-
           <h1 className={styles.tituloEditar}>Editar Inquilino</h1>
-
           <p className={styles.subtituloEditar}>
-            Atualize os dados cadastrais, contrato e regras para cobranças
-            futuras.
+            Atualize os dados cadastrais, contrato e regras para cobranças futuras.
           </p>
         </div>
       </div>
@@ -83,8 +111,7 @@ export default function EditarInquilino() {
         <h3>Atenção</h3>
         <p>
           As alterações feitas aqui afetam o cadastro do inquilino, o contrato e
-          as próximas cobranças. Cobranças já lançadas devem ser editadas na
-          tela de cobranças.
+          as próximas cobranças. Cobranças já lançadas devem ser editadas na tela de cobranças.
         </p>
       </div>
 
@@ -94,7 +121,6 @@ export default function EditarInquilino() {
 
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>Nome completo</label>
-
             <input
               type="text"
               name="nome"
@@ -107,7 +133,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>CPF</label>
-
             <input
               type="text"
               name="cpf"
@@ -115,7 +140,6 @@ export default function EditarInquilino() {
               value={formData.cpf}
               disabled
             />
-
             <span className={styles.campoAjuda}>
               CPF bloqueado para evitar alteração acidental do cadastro.
             </span>
@@ -123,7 +147,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>WhatsApp para contato</label>
-
             <input
               type="text"
               name="telefone"
@@ -135,7 +158,6 @@ export default function EditarInquilino() {
 
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>E-mail</label>
-
             <input
               type="email"
               name="email"
@@ -151,7 +173,6 @@ export default function EditarInquilino() {
 
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>Imóvel vinculado</label>
-
             <input
               type="text"
               name="imovel"
@@ -163,7 +184,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Valor do aluguel</label>
-
             <input
               type="number"
               name="aluguel"
@@ -175,7 +195,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Dia do vencimento</label>
-
             <input
               type="number"
               name="vencimento"
@@ -189,7 +208,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Data de início</label>
-
             <input
               type="date"
               name="dataInicio"
@@ -201,7 +219,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Data de fim</label>
-
             <input
               type="date"
               name="dataFim"
@@ -214,11 +231,9 @@ export default function EditarInquilino() {
 
         <div className={styles.despesasCard}>
           <h2 className={styles.secaoTitulo}>Despesas do contrato</h2>
-
           <p className={styles.textoAjuda}>
             Defina se água, luz e IPTU são fixos, variáveis ou se não são
-            cobrados neste contrato. Essas regras serão usadas nas próximas
-            cobranças.
+            cobrados neste contrato. Essas regras serão usadas nas próximas cobranças.
           </p>
 
           <div className={styles.despesaLinha}>
@@ -226,7 +241,6 @@ export default function EditarInquilino() {
               <h3 className={styles.despesaTitulo}>Água</h3>
               <span>Como a água será cobrada?</span>
             </div>
-
             <select
               name="aguaTipo"
               className={styles.selectForm}
@@ -237,7 +251,6 @@ export default function EditarInquilino() {
               <option value="fixo">Valor fixo</option>
               <option value="variavel">Variável mensal</option>
             </select>
-
             {formData.aguaTipo === "fixo" && (
               <input
                 type="number"
@@ -255,7 +268,6 @@ export default function EditarInquilino() {
               <h3 className={styles.despesaTitulo}>Luz</h3>
               <span>Como a luz será cobrada?</span>
             </div>
-
             <select
               name="luzTipo"
               className={styles.selectForm}
@@ -266,7 +278,6 @@ export default function EditarInquilino() {
               <option value="fixo">Valor fixo</option>
               <option value="variavel">Variável mensal</option>
             </select>
-
             {formData.luzTipo === "fixo" && (
               <input
                 type="number"
@@ -284,7 +295,6 @@ export default function EditarInquilino() {
               <h3 className={styles.despesaTitulo}>IPTU</h3>
               <span>Como o IPTU será cobrado?</span>
             </div>
-
             <select
               name="iptuTipo"
               className={styles.selectForm}
@@ -295,7 +305,6 @@ export default function EditarInquilino() {
               <option value="fixo">Valor fixo</option>
               <option value="variavel">Variável mensal</option>
             </select>
-
             {formData.iptuTipo === "fixo" && (
               <input
                 type="number"
@@ -317,7 +326,6 @@ export default function EditarInquilino() {
           >
             Cancelar
           </button>
-
           <button type="submit" className={styles.botaoSalvar}>
             Salvar alterações
           </button>

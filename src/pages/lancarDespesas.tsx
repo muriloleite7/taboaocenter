@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ChangeEvent, FormEvent } from "react";
+import { useNavigate } from "react-router-dom"; 
 import { inquilinosMock, type InquilinoMock } from "../data/inquilinosMock";
-import { formatarMoeda } from "../data/cobrancasMock";
+import { formatarMoeda, cobrancasMock } from "../data/cobrancasMock";
 import styles from "../style/lancarDespesas.module.css";
 
 export default function LancarDespesas() {
+  const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [mostrarResultados, setMostrarResultados] = useState(false);
+
+  // armazena o ID da cobrança encontrada no localStorage para podermos atualizá-la
+  const [cobrancaIdSelecionada, setCobrancaIdSelecionada] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     inquilino: "",
@@ -23,7 +28,6 @@ export default function LancarDespesas() {
 
   const resultadosBusca = inquilinosMock.filter((inquilino) => {
     const textoBusca = `${inquilino.nome} ${inquilino.cpf} ${inquilino.imovel}`;
-
     return textoBusca.toLowerCase().includes(busca.toLowerCase());
   });
 
@@ -31,14 +35,43 @@ export default function LancarDespesas() {
     setBusca(`${inquilino.nome} - ${inquilino.imovel}`);
     setMostrarResultados(false);
 
-    setFormData((prev) => ({
-      ...prev,
-      inquilino: inquilino.nome,
-      cpf: inquilino.cpf,
-      imovel: inquilino.imovel,
-      aluguel: inquilino.aluguel,
-      vencimento: inquilino.vencimentoData,
-    }));
+    // puxa as cobranças atuais do localStorage
+    const cobrancasSalvas = localStorage.getItem("@TaboaoCenter:cobrancas");
+    const listaCobrancas = cobrancasSalvas ? JSON.parse(cobrancasSalvas) : cobrancasMock;
+
+    // tenta encontrar se já existe uma cobrança para ESSE inquilino NESSA referência
+    const cobrancaExistente = listaCobrancas.find(
+      (c: any) => c.inquilinoId === inquilino.id && c.referencia === formData.referencia
+    );
+
+    if (cobrancaExistente) {
+      setCobrancaIdSelecionada(cobrancaExistente.id);
+      setFormData((prev) => ({
+        ...prev,
+        inquilino: inquilino.nome,
+        cpf: inquilino.cpf,
+        imovel: inquilino.imovel,
+        aluguel: cobrancaExistente.aluguel,
+        vencimento: cobrancaExistente.vencimento,
+        agua: cobrancaExistente.agua || "",
+        luz: cobrancaExistente.luz || "",
+        iptu: cobrancaExistente.iptu || "",
+      }));
+    } else {
+      // se não acha cobrança aberta para o mês, cria com os dados padrão do inquilino
+      setCobrancaIdSelecionada(null);
+      setFormData((prev) => ({
+        ...prev,
+        inquilino: inquilino.nome,
+        cpf: inquilino.cpf,
+        imovel: inquilino.imovel,
+        aluguel: inquilino.aluguel,
+        vencimento: inquilino.vencimentoData,
+        agua: "",
+        luz: "",
+        iptu: "",
+      }));
+    }
   };
 
   const handleBuscaChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -46,6 +79,7 @@ export default function LancarDespesas() {
     setMostrarResultados(true);
 
     if (e.target.value === "") {
+      setCobrancaIdSelecionada(null);
       setFormData((prev) => ({
         ...prev,
         inquilino: "",
@@ -53,6 +87,9 @@ export default function LancarDespesas() {
         imovel: "",
         aluguel: "",
         vencimento: "",
+        agua: "",
+        luz: "",
+        iptu: "",
       }));
     }
   };
@@ -80,15 +117,50 @@ export default function LancarDespesas() {
   const handleSalvar = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const dadosParaEnviar = {
-      ...formData,
-      subtotal,
-      multa,
-      totalPrevisto,
-      status: "Pendente",
-    };
+    if (!formData.inquilino) {
+      alert("Por favor, selecione um inquilino.");
+      return;
+    }
 
-    console.log("Despesas lançadas:", dadosParaEnviar);
+    const cobrancasSalvas = localStorage.getItem("@TaboaoCenter:cobrancas");
+    let listaCobrancas = cobrancasSalvas ? JSON.parse(cobrancasSalvas) : [...cobrancasMock];
+
+    if (cobrancaIdSelecionada) {
+      listaCobrancas = listaCobrancas.map((cob: any) => {
+        if (cob.id === cobrancaIdSelecionada) {
+          return {
+            ...cob,
+            agua: agua,
+            luz: luz,
+            iptu: iptu,
+            vencimento: formData.vencimento,
+            referencia: formData.referencia,
+            status: "Pendente", 
+          };
+        }
+        return cob;
+      });
+      alert("Despesas aplicadas à cobrança com sucesso!");
+    } else {
+      const inquilinoObj = inquilinosMock.find(i => i.nome === formData.inquilino);
+      const novaCobranca = {
+        id: `cob_${Date.now()}`,
+        inquilinoId: inquilinoObj ? inquilinoObj.id : "1",
+        referencia: formData.referencia,
+        aluguel: aluguel,
+        agua: agua,
+        luz: luz,
+        iptu: iptu,
+        vencimento: formData.vencimento,
+        status: "Pendente",
+      };
+      listaCobrancas.unshift(novaCobranca);
+      alert("Nova cobrança com despesas gerada com sucesso!");
+    }
+
+    localStorage.setItem("@TaboaoCenter:cobrancas", JSON.stringify(listaCobrancas));
+
+    navigate("/cobrancas");
   };
 
   return (
