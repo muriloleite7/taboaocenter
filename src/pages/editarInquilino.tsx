@@ -1,34 +1,84 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import { useParams, Link } from "react-router-dom";
-import { getInquilinoById } from "../data/inquilinosMock";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import api from "../services/api"; // Instância do Axios ou fetch configurado
 import styles from "../style/editarInquilino.module.css";
+
+// Função utilitária para converter datas do formato ISO (vinda do banco) para YYYY-MM-DD (exigida pelo input date)
+const formatarDataParaInput = (dataIso: string | undefined): string => {
+  if (!dataIso) return "";
+  return dataIso.split("T")[0];
+};
 
 export default function EditarInquilino() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
-  const inquilinoEncontrado = getInquilinoById(id);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [inquilinoEncontrado, setInquilinoEncontrado] = useState<boolean>(true);
 
   const [formData, setFormData] = useState({
-    nome: inquilinoEncontrado?.nome || "",
-    cpf: inquilinoEncontrado?.cpf || "",
-    telefone: inquilinoEncontrado?.telefone || "",
-    email: inquilinoEncontrado?.email || "",
-    imovel: inquilinoEncontrado?.imovel || "",
-    aluguel: inquilinoEncontrado?.aluguel || "",
-    vencimento: inquilinoEncontrado?.diaVencimento || "",
-    dataInicio: inquilinoEncontrado?.dataInicio || "",
-    dataFim: inquilinoEncontrado?.dataFim || "",
+    nome: "",
+    cpf: "",
+    telefone: "",
+    email: "",
+    imovel: "",
+    aluguel: "",
+    vencimento: "",
+    dataInicio: "",
+    dataFim: "",
 
-    aguaTipo: inquilinoEncontrado?.aguaTipo || "variavel",
-    aguaValor: inquilinoEncontrado?.aguaValor || "",
+    aguaTipo: "variavel",
+    aguaValor: "",
 
-    luzTipo: inquilinoEncontrado?.luzTipo || "variavel",
-    luzValor: inquilinoEncontrado?.luzValor || "",
+    luzTipo: "variavel",
+    luzValor: "",
 
-    iptuTipo: inquilinoEncontrado?.iptuTipo || "variavel",
-    iptuValor: inquilinoEncontrado?.iptuValor || "",
+    iptuTipo: "variavel",
+    iptuValor: "",
   });
+
+  // Busca os dados do inquilino diretamente da API ao montar o componente
+  useEffect(() => {
+    async function obterDados() {
+      try {
+        setLoading(true);
+        const response = await api.get(`/inquilinos/${id}`);
+        const dados = response.data;
+
+        if (!dados) {
+          setInquilinoEncontrado(false);
+          return;
+        }
+
+        setFormData({
+          nome: dados.nome || "",
+          cpf: dados.cpf || "",
+          telefone: dados.telefone || "",
+          email: dados.email || "",
+          imovel: dados.imovel || "",
+          aluguel: dados.aluguel || "",
+          vencimento: dados.diaVencimento || "",
+          dataInicio: formatarDataParaInput(dados.dataInicio),
+          dataFim: formatarDataParaInput(dados.dataFim),
+          aguaTipo: dados.aguaTipo || "variavel",
+          aguaValor: dados.aguaValor || "",
+          luzTipo: dados.luzTipo || "variavel",
+          luzValor: dados.luzValor || "",
+          iptuTipo: dados.iptuTipo || "variavel",
+          iptuValor: dados.iptuValor || "",
+        });
+        setInquilinoEncontrado(true);
+      } catch (error) {
+        console.error("Erro ao buscar dados do inquilino:", error);
+        setInquilinoEncontrado(false);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (id) obterDados();
+  }, [id]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -41,20 +91,42 @@ export default function EditarInquilino() {
     }));
   };
 
-  const handleSalvar = (e: FormEvent<HTMLFormElement>) => {
+  const handleSalvar = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log("Dados atualizados:", {
-      id,
-      ...formData,
-    });
+    try {
+      // Estruturando o payload limpando campos numéricos vazios
+      const dadosParaSalvar = {
+        ...formData,
+        aluguel: formData.aluguel ? Number(formData.aluguel) : null,
+        vencimento: formData.vencimento ? Number(formData.vencimento) : null,
+        aguaValor: formData.aguaTipo === "fixo" ? Number(formData.aguaValor) : null,
+        luzValor: formData.luzTipo === "fixo" ? Number(formData.luzValor) : null,
+        iptuValor: formData.iptuTipo === "fixo" ? Number(formData.iptuValor) : null,
+      };
+
+      await api.put(`/inquilinos/${id}`, dadosParaSalvar);
+      
+      // Redireciona o usuário para a página de visualização do inquilino após salvar
+      navigate(`/inquilinos/${id}`);
+    } catch (error) {
+      console.error("Erro ao atualizar dados do inquilino:", error);
+      alert("Não foi possível salvar as alterações. Tente novamente.");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className={styles.containerEditar}>
+        <h1>Carregando dados...</h1>
+      </div>
+    );
+  }
 
   if (!inquilinoEncontrado) {
     return (
       <div className={styles.containerEditar}>
         <h1>Inquilino não encontrado</h1>
-
         <Link to="/inquilinos" className={styles.voltarLink}>
           Voltar para inquilinos
         </Link>
@@ -94,7 +166,6 @@ export default function EditarInquilino() {
 
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>Nome completo</label>
-
             <input
               type="text"
               name="nome"
@@ -107,7 +178,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>CPF</label>
-
             <input
               type="text"
               name="cpf"
@@ -115,7 +185,6 @@ export default function EditarInquilino() {
               value={formData.cpf}
               disabled
             />
-
             <span className={styles.campoAjuda}>
               CPF bloqueado para evitar alteração acidental do cadastro.
             </span>
@@ -123,7 +192,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>WhatsApp para contato</label>
-
             <input
               type="text"
               name="telefone"
@@ -135,7 +203,6 @@ export default function EditarInquilino() {
 
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>E-mail</label>
-
             <input
               type="email"
               name="email"
@@ -151,7 +218,6 @@ export default function EditarInquilino() {
 
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>Imóvel vinculado</label>
-
             <input
               type="text"
               name="imovel"
@@ -163,7 +229,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Valor do aluguel</label>
-
             <input
               type="number"
               name="aluguel"
@@ -175,7 +240,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Dia do vencimento</label>
-
             <input
               type="number"
               name="vencimento"
@@ -189,7 +253,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Data de início</label>
-
             <input
               type="date"
               name="dataInicio"
@@ -201,7 +264,6 @@ export default function EditarInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Data de fim</label>
-
             <input
               type="date"
               name="dataFim"

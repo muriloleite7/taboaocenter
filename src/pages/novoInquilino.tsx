@@ -1,13 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../style/novoInquilino.module.css";
+import api from "../services/api"; // Certifique-se de que sua instância do axios está aqui
 
 export default function NovoInquilino() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     nome: "",
     cpf: "",
     telefone: "",
     email: "",
-    imovel: "",
+    imovel: "", // Será o 'titulo' no banco
     aluguel: "",
     vencimento: "",
     dataInicio: "",
@@ -34,11 +39,9 @@ export default function NovoInquilino() {
     const { name, value } = e.target;
     let formattedValue = value;
 
-    // 1. Lógica das Máscaras (CPF e Telefone)
     if (name === "cpf") formattedValue = maskCPF(value);
     if (name === "telefone") formattedValue = maskPhone(value);
 
-    // 2. Limpeza Automática do Endereço
     if (name === "cep" && value === "") {
       setFormData((prev) => ({
         ...prev,
@@ -57,25 +60,67 @@ export default function NovoInquilino() {
     }));
   };
 
-  const handleSalvar = (e: React.FormEvent<HTMLFormElement>) => {
+  // --- LÓGICA DE SALVAMENTO INTEGRADA ---
+  const handleSalvar = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
 
-    console.log("Enviando dados:", formData);
+    try {
+      // Estruturamos o objeto para o backend relacional
+      const payload = {
+        inquilino: {
+          nome: formData.nome,
+          cpf: formData.cpf,
+          telefone: formData.telefone,
+          email: formData.email,
+        },
+        imovel: {
+          titulo: formData.imovel,
+        },
+        endereco: {
+          cep: formData.cep,
+          rua: formData.rua,
+          bairro: formData.bairro,
+          cidade: formData.cidade,
+          uf: formData.uf,
+          numero: formData.numero,
+        },
+        contrato: {
+          data_de_inicio: new Date(formData.dataInicio).toISOString(),
+          data_de_fim: formData.dataFim ? new Date(formData.dataFim).toISOString() : null,
+          vencimento: Number(formData.vencimento),
+          valor_aluguel: parseFloat(formData.aluguel),
+          // Enviamos as configurações de despesas
+          config_despesas: {
+            agua: { tipo: formData.aguaTipo, valor: parseFloat(formData.aguaValor) || 0 },
+            luz: { tipo: formData.luzTipo, valor: parseFloat(formData.luzValor) || 0 },
+            iptu: { tipo: formData.iptuTipo, valor: parseFloat(formData.iptuValor) || 0 },
+          }
+        }
+      };
 
-    // Aqui entra a integração com o banco futuramente
+      await api.post("/inquilinos/completo", payload);
+      
+      alert("Cadastro realizado com sucesso!");
+      navigate("/inquilinos");
+    } catch (error: any) {
+      console.error("Erro ao salvar:", error);
+      alert(error.response?.data?.error || "Erro ao salvar inquilino. Verifique os dados.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Remove tudo que não é número e aplica a máscara de CPF
+  // --- MÁSCARAS E CEP (Mantidos conforme original) ---
   const maskCPF = (value) => {
     return value
-      .replace(/\D/g, "") // Remove letras
-      .replace(/(\d{3})(\d)/, "$1.$2") // Coloca o primeiro ponto
-      .replace(/(\d{3})(\d)/, "$1.$2") // Coloca o segundo ponto
-      .replace(/(\d{3})(\d{1,2})$/, "$1-$2") // Coloca o hífen
-      .substring(0, 14); // Limita o tamanho
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .substring(0, 14);
   };
 
-  // Máscara de Telefone (11) 99999-9999
   const maskPhone = (value) => {
     return value
       .replace(/\D/g, "")
@@ -86,9 +131,6 @@ export default function NovoInquilino() {
 
   const checkCEP = (e) => {
     const cep = e.target.value.replace(/\D/g, "");
-
-    if (cep === "") return;
-
     if (cep.length !== 8) return;
     fetch(`https://viacep.com.br/ws/${cep}/json/`)
       .then((res) => res.json())
@@ -102,8 +144,7 @@ export default function NovoInquilino() {
             uf: data.uf,
           }));
         }
-      })
-      .catch((err) => console.error("Erro ao buscar CEP:", err));
+      });
   };
 
   return (
@@ -118,9 +159,9 @@ export default function NovoInquilino() {
       </div>
 
       <form className={styles.formularioCard} onSubmit={handleSalvar}>
+        {/* SEÇÃO: Identificação pessoal */}
         <div className={styles.gridCampos}>
           <h3 className={styles.secaoTitulo}>Identificação pessoal</h3>
-
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>Nome completo</label>
             <input
@@ -133,7 +174,6 @@ export default function NovoInquilino() {
               required
             />
           </div>
-
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>CPF</label>
             <input
@@ -143,9 +183,9 @@ export default function NovoInquilino() {
               placeholder="000.000.000-00"
               value={formData.cpf}
               onChange={handleChange}
+              required
             />
           </div>
-
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>WhatsApp para contato</label>
             <input
@@ -157,7 +197,6 @@ export default function NovoInquilino() {
               onChange={handleChange}
             />
           </div>
-
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>E-mail</label>
             <input
@@ -171,35 +210,9 @@ export default function NovoInquilino() {
           </div>
         </div>
 
+        {/* SEÇÃO: Endereço */}
         <div className={styles.gridCampos}>
-          <h3 className={styles.secaoTitulo}>Contato de emergência</h3>
-          <div className={styles.campoGrupo}>
-            <label className={styles.labelForm}>Nome do contato</label>
-            <input
-              type="text"
-              name="emergenciaNome"
-              className={styles.inputForm}
-              placeholder="Ex: Maria (Mãe)"
-              onChange={handleChange}
-            />
-          </div>
-          <div className={styles.campoGrupo}>
-            <label className={styles.labelForm}>Telefone de emergência</label>
-            <input
-              type="text"
-              name="emergenciaTel"
-              className={styles.inputForm}
-              placeholder="(11) 90000-0000"
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-
-        <div className={styles.gridCampos}>
-          <h3 className={styles.secaoTitulo}>
-            Endereço de residência (Inquilino)
-          </h3>
-
+          <h3 className={styles.secaoTitulo}>Endereço de residência (Inquilino)</h3>
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>CEP</label>
             <input
@@ -209,10 +222,9 @@ export default function NovoInquilino() {
               placeholder="00000-000"
               value={formData.cep}
               onChange={handleChange}
-              onBlur={checkCEP} // Busca quando o usuário clica fora do campo
+              onBlur={checkCEP}
             />
           </div>
-
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Rua</label>
             <input
@@ -223,7 +235,6 @@ export default function NovoInquilino() {
               onChange={handleChange}
             />
           </div>
-
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Bairro</label>
             <input
@@ -234,7 +245,6 @@ export default function NovoInquilino() {
               onChange={handleChange}
             />
           </div>
-
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Número / Comp.</label>
             <input
@@ -247,21 +257,21 @@ export default function NovoInquilino() {
           </div>
         </div>
 
+        {/* SEÇÃO: Contrato */}
         <div className={styles.gridCampos}>
           <h3 className={styles.secaoTitulo}>Contrato</h3>
-
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
-            <label className={styles.labelForm}>Imóvel vinculado</label>
+            <label className={styles.labelForm}>Imóvel vinculado (Título)</label>
             <input
               type="text"
               name="imovel"
               className={styles.inputForm}
-              placeholder="Ex: Apto 203 - Bloco B"
+              placeholder="Ex: Sala 102 - Taboão Center"
               value={formData.imovel}
               onChange={handleChange}
+              required
             />
           </div>
-
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Valor do aluguel</label>
             <input
@@ -271,9 +281,9 @@ export default function NovoInquilino() {
               placeholder="Ex: 1200"
               value={formData.aluguel}
               onChange={handleChange}
+              required
             />
           </div>
-
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Dia do vencimento</label>
             <input
@@ -285,9 +295,9 @@ export default function NovoInquilino() {
               max="31"
               value={formData.vencimento}
               onChange={handleChange}
+              required
             />
           </div>
-
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Data de início</label>
             <input
@@ -296,9 +306,9 @@ export default function NovoInquilino() {
               className={styles.inputForm}
               value={formData.dataInicio}
               onChange={handleChange}
+              required
             />
           </div>
-
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Data de fim</label>
             <input
@@ -311,112 +321,68 @@ export default function NovoInquilino() {
           </div>
         </div>
 
+        {/* SEÇÃO: Despesas */}
         <div className={styles.despesasCard}>
           <h3 className={styles.secaoTitulo}>Despesas do contrato</h3>
           <p className={styles.textoAjuda}>
-            Defina se água, luz e IPTU serão fixos, variáveis ou se não serão
-            cobrados neste contrato.
+            Defina se água, luz e IPTU serão fixos, variáveis ou não cobrados.
           </p>
 
+          {/* Água */}
           <div className={styles.despesaLinha}>
             <div>
               <h1 className={styles.despesaTitulo}>Água</h1>
               <span>Como a água será cobrada?</span>
             </div>
-
-            <select
-              name="aguaTipo"
-              className={styles.selectForm}
-              value={formData.aguaTipo}
-              onChange={handleChange}
-            >
+            <select name="aguaTipo" className={styles.selectForm} value={formData.aguaTipo} onChange={handleChange}>
               <option value="nao_cobra">Não cobra</option>
               <option value="fixo">Valor fixo</option>
               <option value="variavel">Variável mensal</option>
             </select>
-
             {formData.aguaTipo === "fixo" && (
-              <input
-                type="number"
-                name="aguaValor"
-                className={styles.inputDespesa}
-                placeholder="Valor fixo"
-                value={formData.aguaValor}
-                onChange={handleChange}
-              />
+              <input type="number" name="aguaValor" className={styles.inputDespesa} placeholder="Valor fixo" value={formData.aguaValor} onChange={handleChange} />
             )}
           </div>
 
+          {/* Luz */}
           <div className={styles.despesaLinha}>
             <div>
               <h1 className={styles.despesaTitulo}>Luz</h1>
               <span>Como a luz será cobrada?</span>
             </div>
-
-            <select
-              name="luzTipo"
-              className={styles.selectForm}
-              value={formData.luzTipo}
-              onChange={handleChange}
-            >
+            <select name="luzTipo" className={styles.selectForm} value={formData.luzTipo} onChange={handleChange}>
               <option value="nao_cobra">Não cobra</option>
               <option value="fixo">Valor fixo</option>
               <option value="variavel">Variável mensal</option>
             </select>
-
             {formData.luzTipo === "fixo" && (
-              <input
-                type="number"
-                name="luzValor"
-                className={styles.inputDespesa}
-                placeholder="Valor fixo"
-                value={formData.luzValor}
-                onChange={handleChange}
-              />
+              <input type="number" name="luzValor" className={styles.inputDespesa} placeholder="Valor fixo" value={formData.luzValor} onChange={handleChange} />
             )}
           </div>
 
+          {/* IPTU */}
           <div className={styles.despesaLinha}>
             <div>
               <h1 className={styles.despesaTitulo}>IPTU</h1>
               <span>Como o IPTU será cobrado?</span>
             </div>
-
-            <select
-              name="iptuTipo"
-              className={styles.selectForm}
-              value={formData.iptuTipo}
-              onChange={handleChange}
-            >
+            <select name="iptuTipo" className={styles.selectForm} value={formData.iptuTipo} onChange={handleChange}>
               <option value="nao_cobra">Não cobra</option>
               <option value="fixo">Valor fixo</option>
               <option value="variavel">Variável mensal</option>
             </select>
-
             {formData.iptuTipo === "fixo" && (
-              <input
-                type="number"
-                name="iptuValor"
-                className={styles.inputDespesa}
-                placeholder="Valor fixo"
-                value={formData.iptuValor}
-                onChange={handleChange}
-              />
+              <input type="number" name="iptuValor" className={styles.inputDespesa} placeholder="Valor fixo" value={formData.iptuValor} onChange={handleChange} />
             )}
           </div>
         </div>
 
         <div className={styles.areaBotoes}>
-          <button
-            type="button"
-            className={styles.botaoVoltar}
-            onClick={() => window.history.back()}
-          >
+          <button type="button" className={styles.botaoVoltar} onClick={() => navigate("/inquilinos")}>
             Cancelar
           </button>
-
-          <button type="submit" className={styles.botaoSalvar}>
-            Salvar inquilino
+          <button type="submit" className={styles.botaoSalvar} disabled={loading}>
+            {loading ? "Salvando..." : "Salvar inquilino"}
           </button>
         </div>
       </form>

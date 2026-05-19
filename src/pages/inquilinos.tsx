@@ -2,41 +2,47 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Card from "../components/cards";
 import styles from "../style/inquilinos.module.css";
-import api from "../services/api"; // Importe sua instância do axios
+import api from "../services/api"; 
 import { formatarMoeda, formatarData } from "../data/cobrancasMock";
 import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 
-// Definição da interface baseada no seu Prisma/Controller
 interface Inquilino {
   id: number;
   nome: string;
   email?: string;
   cpf: string;
   telefone: string;
-  imovel?: string;
-  endereco?: string;
-  aluguel?: number | string;
-  vencimentoData?: string;
-  statusPagamento?: string;
-  statusContrato?: string;
+  contratos: {
+    id: number;
+    atraso: boolean;
+    statusContrato?: string;
+    // O contrato agora deve trazer os dados do imóvel vinculado
+    imovel?: {
+      titulo: string;
+    };
+    endereco: {
+      rua: string;
+      numero: string;
+      cidade: string;
+    };
+    cobrancas: {
+      valor_aluguel: number;
+      data: string;
+    }[];
+  }[];
 }
 
 export default function Inquilinos() {
   const navigate = useNavigate();
 
-  // Estados para os dados da API
   const [inquilinos, setInquilinos] = useState<Inquilino[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Estados de filtros e UI
   const [busca, setBusca] = useState("");
   const [statusSelecionado, setStatusSelecionado] = useState("Todos");
-  const [tipoImovelSelecionado, setTipoImovelSelecionado] = useState("Todos");
   const [menuAberto, setMenuAberto] = useState<number | null>(null);
 
   const isAdmin = usuarioLogadoMock.cargo === "admin";
 
-  // 1. Busca os dados do Backend ao carregar a página
   useEffect(() => {
     fetchInquilinos();
   }, []);
@@ -44,7 +50,8 @@ export default function Inquilinos() {
   const fetchInquilinos = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/inquilinos/"); // Rota: inquilinoRoutes.get('/')
+      // Lembre-se de ajustar o Controller para incluir o imovel: { select: { titulo: true } }
+      const response = await api.get("/inquilinos/with-contratos"); 
       setInquilinos(response.data);
     } catch (error) {
       console.error("Erro ao buscar inquilinos:", error);
@@ -54,96 +61,76 @@ export default function Inquilinos() {
     }
   };
 
-  // Funções de tratamento de dados (mantidas do seu original)
-  const getTipoImovel = (imovel: string = "") => {
-    if (imovel.toLowerCase().includes("casa")) return "Casa";
-    if (imovel.toLowerCase().includes("apto")) return "Apartamento";
-    return "Comercial";
-  };
-
-  const getStatusTabela = (statusPagamento: string = "Adimplente") => {
-    if (["Pendente", "Com pendência", "Despesas pendentes"].includes(statusPagamento)) {
-      return "Com pendência";
-    }
-    return statusPagamento;
-  };
-
-  // 2. Lógica de Filtros aplicada sobre os dados da API
+  // Lógica de Filtros
   const inquilinosFiltrados = inquilinos.filter((inquilino) => {
-    const statusTabela = getStatusTabela(inquilino.statusPagamento);
-    const tipoImovel = getTipoImovel(inquilino.imovel);
+    const contrato = inquilino.contratos?.[0];
+    const statusTabela = contrato?.atraso ? "Pendência" : "Adimplente";
 
     const textoBusca = `
       ${inquilino.nome}
-      ${inquilino.email || ""}
       ${inquilino.cpf}
       ${inquilino.telefone}
-      ${inquilino.imovel || ""}
-      ${statusTabela}
+      ${contrato?.imovel?.titulo || ""}
+      ${contrato?.endereco?.rua || ""}
     `.toLowerCase();
 
     const bateBusca = textoBusca.includes(busca.toLowerCase());
     const bateStatus = statusSelecionado === "Todos" || statusTabela === statusSelecionado;
-    const bateTipo = tipoImovelSelecionado === "Todos" || tipoImovel === tipoImovelSelecionado;
 
-    return bateBusca && bateStatus && bateTipo;
+    return bateBusca && bateStatus;
   });
 
   // Cálculos dos Cards
   const totalAtivos = inquilinos.length;
-  const totalAdimplentes = inquilinos.filter(i => getStatusTabela(i.statusPagamento) === "Adimplente").length;
-  const totalPendentes = inquilinos.filter(i => getStatusTabela(i.statusPagamento) === "Com pendência").length;
-  const totalEncerrados = inquilinos.filter(i => i.statusContrato === "Encerrado").length;
+  const totalAdimplentes = inquilinos.filter(i => !i.contratos?.[0]?.atraso).length;
+  const totalPendentes = inquilinos.filter(i => i.contratos?.[0]?.atraso).length;
+  const totalEncerrados = inquilinos.filter(i => i.contratos?.[0]?.statusContrato === "Encerrado").length;
 
   const alternarMenu = (id: number) => {
     setMenuAberto((menuAtual) => (menuAtual === id ? null : id));
   };
 
-  // 3. Integração com a função Delete do seu Controller
   const handleArquivarInquilino = async (id: number, nome: string) => {
-    const confirmar = window.confirm(`Tem certeza que deseja excluir/arquivar ${nome}?`);
+    const confirmar = window.confirm(`Tem certeza que deseja excluir ${nome}?`);
     if (!confirmar) return;
 
     try {
       await api.delete(`/inquilinos/delete/${id}`);
-      alert("Inquilino removido com sucesso!");
-      fetchInquilinos(); // Atualiza a lista
+      alert("Inquilino removido!");
+      fetchInquilinos();
     } catch (error) {
-      console.error(error);
-      alert("Erro ao excluir inquilino.");
+      alert("Erro ao excluir.");
     }
     setMenuAberto(null);
   };
 
-  if (loading) return <div className={styles.inquilinos}>Carregando...</div>;
+  if (loading) return <div className={styles.inquilinos}>Carregando dados do CRM...</div>;
 
   return (
     <div className={styles.inquilinos}>
       <div className={styles.headerInquilinos}>
         <div>
           <h1 className={styles.tituloInquilinos}>Inquilinos</h1>
-          <p className={styles.subtituloInquilinos}>Gerencie os inquilinos da imobiliária.</p>
+          <p className={styles.subtituloInquilinos}>Gestão de locatários e contratos ativos.</p>
         </div>
         <button onClick={() => navigate("/novo-inquilino")} className={styles.novoInquilino}>
           + Novo inquilino
         </button>
       </div>
 
-      {/* Cards */}
       <div className={styles.cardsInquilinos}>
-        <Card title="Inquilinos ativos" value={totalAtivos} description="No banco de dados" />
-        <Card title="Adimplentes" value={totalAdimplentes} description="Sem pendências" />
-        <Card title="Com pendências" value={totalPendentes} description="Precisam de atenção" />
-        <Card title="Encerrados" value={totalEncerrados} description="Contratos finalizados" />
+        <Card title="Inquilinos" value={totalAtivos} description="Total cadastrado" />
+        <Card title="Adimplentes" value={totalAdimplentes} description="Pagamentos em dia" />
+        <Card title="Pendências" value={totalPendentes} description="Atrasos detectados" />
+        <Card title="Encerrados" value={totalEncerrados} description="Histórico" />
       </div>
 
-      {/* Filtros */}
       <div className={styles.filtrosInquilinos}>
         <div className={styles.searchBox}>
           <span className={styles.searchIcon}>⌕</span>
           <input
             type="text"
-            placeholder="Buscar por nome, CPF, telefone..."
+            placeholder="Buscar por nome, CPF, título ou rua..."
             className={styles.searchInput}
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -155,31 +142,32 @@ export default function Inquilinos() {
           <select className={styles.selectFilter} value={statusSelecionado} onChange={(e) => setStatusSelecionado(e.target.value)}>
             <option>Todos</option>
             <option>Adimplente</option>
-            <option>Com pendência</option>
-            <option>Encerrado</option>
+            <option>Pendência</option>
           </select>
         </div>
-        <button className={styles.exportButton}>⇩ Exportar</button>
+        <button className={styles.exportButton}>⇩ Exportar Lista</button>
       </div>
 
-      {/* Tabela */}
       <div className={styles.tabelaContainer}>
         <table className={styles.tabelaInquilinos}>
           <thead>
             <tr>
-              <th>Nome</th>
+              <th>Nome / E-mail</th>
               <th>CPF</th>
               <th>Telefone</th>
-              <th>Imóvel</th>
-              <th>Aluguel</th>
-              <th>Vencimento</th>
+              <th>Imóvel / Endereço</th>
+              <th>Valor Aluguel</th>
+              <th>Próx. Vencimento</th>
               <th>Status</th>
               <th>Ações</th>
             </tr>
           </thead>
           <tbody>
             {inquilinosFiltrados.map((inquilino) => {
-              const statusTabela = getStatusTabela(inquilino.statusPagamento);
+              const contrato = inquilino.contratos?.[0];
+              const cobranca = contrato?.cobrancas?.[0];
+              const statusTabela = contrato?.atraso ? "Pendência" : "Adimplente";
+
               return (
                 <tr key={inquilino.id}>
                   <td>
@@ -189,7 +177,7 @@ export default function Inquilinos() {
                       </div>
                       <div>
                         <strong>{inquilino.nome}</strong>
-                        <span>{inquilino.email || "Sem e-mail"}</span>
+                        <span>{inquilino.email || "---"}</span>
                       </div>
                     </div>
                   </td>
@@ -197,12 +185,13 @@ export default function Inquilinos() {
                   <td>{inquilino.telefone}</td>
                   <td>
                     <div className={styles.infoImovel}>
-                      <strong>{inquilino.imovel || "Não vinculado"}</strong>
-                      <span>{inquilino.endereco || "---"}</span>
+                      {/* Exibindo o Título do Imóvel em vez do Tipo fixo */}
+                      <strong>{contrato?.imovel?.titulo || "Sem contrato"}</strong>
+                      <span>{contrato ? `${contrato.endereco.rua}, ${contrato.endereco.numero}` : "---"}</span>
                     </div>
                   </td>
-                  <td>{formatarMoeda(Number(inquilino.aluguel || 0))}</td>
-                  <td>{inquilino.vencimentoData ? formatarData(inquilino.vencimentoData) : "---"}</td>
+                  <td>{formatarMoeda(Number(cobranca?.valor_aluguel || 0))}</td>
+                  <td>{cobranca?.data ? formatarData(cobranca.data) : "---"}</td>
                   <td>
                     <span className={statusTabela === "Adimplente" ? styles.statusAdimplente : styles.statusPendente}>
                       {statusTabela}
@@ -210,20 +199,20 @@ export default function Inquilinos() {
                   </td>
                   <td>
                     <div className={styles.acoesTabela}>
-                      <Link to={`/inquilinos/${inquilino.id}`} className={styles.botaoAcao} title="Ver detalhes">👁</Link>
-                      <Link to={`/inquilinos/${inquilino.id}/editar`} className={styles.botaoAcao} title="Editar">✎</Link>
+                      <Link to={`/inquilinos/${inquilino.id}`} className={styles.botaoAcao}>👁</Link>
+                      <Link to={`/inquilinos/${inquilino.id}/editar`} className={styles.botaoAcao}>✎</Link>
                       <div className={styles.menuWrapper}>
                         <button type="button" onClick={() => alternarMenu(inquilino.id)}>⋮</button>
                         {menuAberto === inquilino.id && (
                           <div className={styles.menuAcoes}>
-                            <button type="button" onClick={() => alert("Cobrancas em breve")}>Ver cobranças</button>
+                            <button type="button" onClick={() => navigate(`/financeiro/${inquilino.id}`)}>Ver extrato</button>
                             {isAdmin && (
                               <button 
                                 type="button" 
                                 className={styles.acaoPerigosa} 
                                 onClick={() => handleArquivarInquilino(inquilino.id, inquilino.nome)}
                               >
-                                Excluir Inquilino
+                                Excluir Registro
                               </button>
                             )}
                           </div>
