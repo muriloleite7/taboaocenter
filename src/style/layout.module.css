@@ -8,15 +8,20 @@
   flex: 1;
   background-color: var(--bg-main);
   padding: 30px;
-  
-  margin-left: var(--sidebar-width); 
-  
+  margin-left: var(--sidebar-width);
   min-width: 0;
   transition: margin-left var(--transition-speed) ease;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .conteudoPrincipal {
     margin-left: 0;
+    padding: 76px 18px 24px;
+  }
+}
+
+@media (max-width: 420px) {
+  .conteudoPrincipal {
+    padding: 72px 14px 22px;
   }
 }

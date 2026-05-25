@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import styles from "../style/sidebar.module.css";
 import {
@@ -6,92 +7,145 @@ import {
   FiCreditCard,
   FiFileText,
   FiSettings,
+  FiMenu,
+  FiX,
+  FiLogOut,
 } from "react-icons/fi";
 import { useAuth } from "../auth/authContext";
-{
-  /* Ícones do React Icons para cada tela na sidebar */
-}
 
 export default function Sidebar() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const [sidebarAberta, setSidebarAberta] = useState(false);
+
+  const fecharSidebar = () => {
+    setSidebarAberta(false);
+  };
+
+  const abrirSidebar = () => {
+    setSidebarAberta(true);
+  };
+
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.logoArea}>
-        <div className={styles.logoIcon}>
-          <FiHome />
+    <>
+      <button
+        type="button"
+        className={styles.mobileMenuButton}
+        onClick={abrirSidebar}
+        aria-label="Abrir menu"
+      >
+        <FiMenu />
+      </button>
+
+      {sidebarAberta && (
+        <div className={styles.overlay} onClick={fecharSidebar}></div>
+      )}
+
+      <aside
+        className={
+          sidebarAberta
+            ? `${styles.sidebar} ${styles.sidebarAberta}`
+            : styles.sidebar
+        }
+      >
+        <div className={styles.mobileSidebarHeader}>
+          <span>Menu</span>
+
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={fecharSidebar}
+            aria-label="Fechar menu"
+          >
+            <FiX />
+          </button>
         </div>
 
-        <div>
-          <h2>Taboão Center</h2>
-          <span>Imobiliária</span>
-        </div>
-      </div>
+        <div className={styles.logoArea}>
+          <div className={styles.logoIcon}>
+            <FiHome />
+          </div>
 
-      <nav className={styles.menu}>
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
-          }
-        >
-          <FiHome className={styles.menuIcon} />
-          Home
-        </NavLink>
-
-        <NavLink
-          to="/inquilinos"
-          className={({ isActive }) =>
-            isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
-          }
-        >
-          <FiUsers className={styles.menuIcon} />
-          Inquilinos
-        </NavLink>
-
-        <NavLink
-          to="/cobrancas"
-          className={({ isActive }) =>
-            isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
-          }
-        >
-          <FiCreditCard className={styles.menuIcon} />
-          Cobranças
-        </NavLink>
-
-        <NavLink
-          to="/contratos"
-          className={({ isActive }) =>
-            isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
-          }
-        >
-          <FiFileText className={styles.menuIcon} />
-          Contratos
-        </NavLink>
-
-        <NavLink
-          to="/configuracoes"
-          className={({ isActive }) =>
-            isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
-          }
-        >
-          <FiSettings className={styles.menuIcon} />
-          Configurações
-        </NavLink>
-      </nav>
-
-      <div className={styles.userArea}>
-        <div className={styles.avatar}>M</div>
-
-        <div className={styles.userInfo}>
-          <strong>Murilo</strong>
-          <span>Administrador</span>
+          <div>
+            <h2>Taboão Center</h2>
+            <span>Imobiliária</span>
+          </div>
         </div>
 
-        {/* falta style para o botão de logout */}
-        <button onClick={logout}>
-          Sair
-        </button>
-      </div>
-    </aside>
+        <nav className={styles.menu}>
+          <NavLink
+            to="/"
+            onClick={fecharSidebar}
+            className={({ isActive }) =>
+              isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
+            }
+          >
+            <FiHome className={styles.menuIcon} />
+            Home
+          </NavLink>
+
+          <NavLink
+            to="/inquilinos"
+            onClick={fecharSidebar}
+            className={({ isActive }) =>
+              isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
+            }
+          >
+            <FiUsers className={styles.menuIcon} />
+            Inquilinos
+          </NavLink>
+
+          <NavLink
+            to="/cobrancas"
+            onClick={fecharSidebar}
+            className={({ isActive }) =>
+              isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
+            }
+          >
+            <FiCreditCard className={styles.menuIcon} />
+            Cobranças
+          </NavLink>
+
+          <NavLink
+            to="/contratos"
+            onClick={fecharSidebar}
+            className={({ isActive }) =>
+              isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
+            }
+          >
+            <FiFileText className={styles.menuIcon} />
+            Contratos
+          </NavLink>
+
+          <NavLink
+            to="/configuracoes"
+            onClick={fecharSidebar}
+            className={({ isActive }) =>
+              isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
+            }
+          >
+            <FiSettings className={styles.menuIcon} />
+            Configurações
+          </NavLink>
+        </nav>
+
+        <div className={styles.userArea}>
+          <div className={styles.avatarUser}>M</div>
+
+          <div className={styles.userInfo}>
+            <strong>Murilo</strong>
+            <span>Administrador</span>
+          </div>
+
+          <button
+            type="button"
+            className={styles.logoutButton}
+            onClick={logout}
+            title="Sair"
+          >
+            <FiLogOut />
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

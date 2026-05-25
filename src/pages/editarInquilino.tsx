@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import api from "../services/api"; // Instância do Axios ou fetch configurado
+import api from "../services/api"; 
 import styles from "../style/editarInquilino.module.css";
 
-// Função utilitária para converter datas do formato ISO (vinda do banco) para YYYY-MM-DD (exigida pelo input date)
+// Função utilitária para converter datas ISO do banco para YYYY-MM-DD (exigida pelo input date nativo)
 const formatarDataParaInput = (dataIso: string | undefined): string => {
   if (!dataIso) return "";
   return dataIso.split("T")[0];
@@ -38,12 +38,16 @@ export default function EditarInquilino() {
     iptuValor: "",
   });
 
-  // Busca os dados do inquilino diretamente da API ao montar o componente
+  // Busca os dados cadastrais utilizando a rota que o console validou que funciona no seu backend
   useEffect(() => {
     async function obterDados() {
       try {
         setLoading(true);
-        const response = await api.get(`/inquilinos/${id}`);
+        const idFormatado = String(id).trim();
+        
+        // CORREÇÃO DA ROTA: Sincronizada com a rota que funciona no seu backend (/inquilinos/detalhes/:id)
+        console.log(`Buscando dados para edição na rota: /inquilinos/detalhes/${idFormatado}`);
+        const response = await api.get(`/inquilinos/detalhes/${idFormatado}`);
         const dados = response.data;
 
         if (!dados) {
@@ -51,26 +55,42 @@ export default function EditarInquilino() {
           return;
         }
 
+        // Mapeamento seguro tratando tabelas aninhadas de contratos (Prisma / Sequelize)
+        const contratoActive = dados.contratos?.[0] || dados.contrato;
+        
+        // Tratamento da string ou objeto de despesas do banco
+        let despesas = { agua: "variavel", aguaValor: "", luz: "variavel", luzValor: "", iptu: "variavel", iptuValor: "" };
+        if (contratoActive?.config_despesas) {
+          try {
+            despesas = typeof contratoActive.config_despesas === "string" 
+              ? JSON.parse(contratoActive.config_despesas) 
+              : contratoActive.config_despesas;
+          } catch (e) {
+            console.error("Erro no parse de despesas:", e);
+          }
+        }
+
         setFormData({
           nome: dados.nome || "",
           cpf: dados.cpf || "",
           telefone: dados.telefone || "",
           email: dados.email || "",
-          imovel: dados.imovel || "",
-          aluguel: dados.aluguel || "",
-          vencimento: dados.diaVencimento || "",
-          dataInicio: formatarDataParaInput(dados.dataInicio),
-          dataFim: formatarDataParaInput(dados.dataFim),
-          aguaTipo: dados.aguaTipo || "variavel",
-          aguaValor: dados.aguaValor || "",
-          luzTipo: dados.luzTipo || "variavel",
-          luzValor: dados.luzValor || "",
-          iptuTipo: dados.iptuTipo || "variavel",
-          iptuValor: dados.iptuValor || "",
+          imovel: contratoActive?.imovel?.titulo || dados.imovel || "",
+          aluguel: contratoActive?.valor_aluguel || dados.aluguel || "",
+          vencimento: contratoActive?.vencimento || dados.diaVencimento || "",
+          dataInicio: formatarDataParaInput(contratoActive?.data_de_inicio || contratoActive?.dataInicio || dados.dataInicio),
+          dataFim: formatarDataParaInput(contratoActive?.data_de_fim || contratoActive?.dataFim || dados.dataFim),
+          aguaTipo: despesas.agua || dados.aguaTipo || "variavel",
+          aguaValor: despesas.aguaValor || dados.aguaValor || "",
+          luzTipo: despesas.luz || dados.luzTipo || "variavel",
+          luzValor: despesas.luzValor || dados.luzValor || "",
+          iptuTipo: despesas.iptu || dados.iptuTipo || "variavel",
+          iptuValor: despesas.iptuValor || dados.iptuValor || "",
         });
+        
         setInquilinoEncontrado(true);
-      } catch (error) {
-        console.error("Erro ao buscar dados do inquilino:", error);
+      } catch (error: any) {
+        console.error("Erro ao buscar dados para edição:", error.response?.data || error.message);
         setInquilinoEncontrado(false);
       } finally {
         setLoading(false);
@@ -95,7 +115,8 @@ export default function EditarInquilino() {
     e.preventDefault();
 
     try {
-      // Estruturando o payload limpando campos numéricos vazios
+      const idFormatado = String(id).trim();
+
       const dadosParaSalvar = {
         ...formData,
         aluguel: formData.aluguel ? Number(formData.aluguel) : null,
@@ -105,20 +126,21 @@ export default function EditarInquilino() {
         iptuValor: formData.iptuTipo === "fixo" ? Number(formData.iptuValor) : null,
       };
 
-      await api.put(`/inquilinos/${id}`, dadosParaSalvar);
+      // Envia as atualizações via PUT para a rota do seu backend
+      await api.put(`/inquilinos/update/${idFormatado}`, dadosParaSalvar);
       
-      // Redireciona o usuário para a página de visualização do inquilino após salvar
-      navigate(`/inquilinos/${id}`);
-    } catch (error) {
-      console.error("Erro ao atualizar dados do inquilino:", error);
-      alert("Não foi possível salvar as alterações. Tente novamente.");
+      alert("Alterações salvas com sucesso!");
+      navigate(`/inquilinos/${idFormatado}`);
+    } catch (error: any) {
+      console.error("Erro ao atualizar dados do inquilino:", error.response?.data || error.message);
+      alert("Não foi possível salvar as alterações. Verifique os dados e tente novamente.");
     }
   };
 
   if (loading) {
     return (
       <div className={styles.containerEditar}>
-        <h1>Carregando dados...</h1>
+        <h1 style={{ textAlign: "center", marginTop: "2rem" }}>Carregando dados...</h1>
       </div>
     );
   }
@@ -127,6 +149,9 @@ export default function EditarInquilino() {
     return (
       <div className={styles.containerEditar}>
         <h1>Inquilino não encontrado</h1>
+        <p style={{ marginBottom: "1.5rem", color: "#666" }}>
+          Não conseguimos localizar o cadastro deste inquilino para edição.
+        </p>
         <Link to="/inquilinos" className={styles.voltarLink}>
           Voltar para inquilinos
         </Link>
@@ -141,12 +166,9 @@ export default function EditarInquilino() {
           <Link to={`/inquilinos/${id}`} className={styles.voltarLink}>
             ← Voltar para detalhes
           </Link>
-
           <h1 className={styles.tituloEditar}>Editar Inquilino</h1>
-
           <p className={styles.subtituloEditar}>
-            Atualize os dados cadastrais, contrato e regras para cobranças
-            futuras.
+            Atualize os dados cadastrais, contrato e regras para cobranças futuras.
           </p>
         </div>
       </div>
@@ -379,7 +401,6 @@ export default function EditarInquilino() {
           >
             Cancelar
           </button>
-
           <button type="submit" className={styles.botaoSalvar}>
             Salvar alterações
           </button>

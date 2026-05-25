@@ -6,6 +6,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 24px;
   margin-bottom: 30px;
 }
 
@@ -20,13 +21,20 @@
   margin-top: 6px;
 }
 
-.voltarLink {
+.voltarButton {
   color: #4f46e5;
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
+.voltarButton:hover {
+  text-decoration: underline;
+}
 .editarButton {
   background: linear-gradient(135deg, #4f46e5, #6366f1);
   color: white;
@@ -40,6 +48,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
 }
 
 .editarButton:hover {
@@ -48,10 +57,14 @@
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
+.headerDetalhe > div:last-child {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 
 .gridResumo {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 22px;
   margin-bottom: 26px;
 }
@@ -62,6 +75,7 @@
   border-radius: 14px;
   padding: 22px;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  min-width: 0;
 }
 
 .resumoCard span {
@@ -74,11 +88,12 @@
   font-size: 20px;
   font-weight: 700;
   margin-top: 8px;
+  overflow-wrap: anywhere;
 }
 
 .conteudoGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 26px;
   margin-bottom: 26px;
 }
@@ -89,6 +104,7 @@
   border-radius: 14px;
   padding: 26px;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  min-width: 0;
 }
 
 .cardInfo h2 {
@@ -118,12 +134,14 @@
   font-size: 14px;
   font-weight: 600;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 18px;
   margin-bottom: 24px;
 }
 
@@ -140,11 +158,12 @@
   color: #000000;
   font-weight: 600;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .cobrancasLista {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -153,6 +172,7 @@
   border-radius: 12px;
   padding: 18px;
   background-color: #f8fafc;
+  min-width: 0;
 }
 
 .cobrancaItem span {
@@ -165,6 +185,7 @@
   font-size: 18px;
   font-weight: 700;
   margin-top: 8px;
+  overflow-wrap: anywhere;
 }
 
 .cobrancaItem p {
@@ -173,6 +194,8 @@
   margin-top: 6px;
   font-weight: 600;
 }
+
+/* MODAL */
 
 .modalOverlay {
   position: fixed;
@@ -185,6 +208,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 20px;
 }
 
 .modalContent {
@@ -193,7 +217,7 @@
   border-radius: 16px;
   max-width: 450px;
   width: 90%;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   text-align: center;
 }
 
@@ -224,7 +248,7 @@
 }
 
 .btnConfirmar {
-  background: #ef4444; 
+  background: #ef4444;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -236,4 +260,147 @@
 .btnConfirmar:hover {
   filter: brightness(0.9);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* NOTEBOOK / TELA MÉDIA */
+
+@media (max-width: 1200px) {
+  .gridResumo {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cobrancasLista {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+  .conteudoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardInfo {
+    padding: 24px;
+  }
+
+  .headerDetalhe {
+    flex-direction: column;
+  }
+
+  .editarButton {
+    width: 100%;
+  }
+
+  .headerDetalhe > div:last-child {
+    width: 100%;
+    flex-direction: column !important;
+  }
+
+  .headerDetalhe > div:last-child .editarButton {
+    width: 100%;
+  }
+}
+
+/* CELULAR */
+
+@media (max-width: 768px) {
+  .detalheInquilino {
+    padding-top: 12px;
+  }
+
+
+  .headerDetalhe h1 {
+    font-size: 28px;
+  }
+
+  .headerDetalhe p {
+    font-size: 15px;
+  }
+
+  .gridResumo {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .resumoCard {
+    padding: 20px;
+  }
+
+  .cardInfo {
+    padding: 22px;
+    border-radius: 14px;
+  }
+
+  .cardInfo h2 {
+    font-size: 20px;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .verTodasLink {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    text-align: center;
+    background-color: #ffffff;
+  }
+
+  .cobrancasLista {
+    grid-template-columns: 1fr;
+  }
+
+  .modalContent {
+    padding: 24px;
+  }
+
+  .modalAcoes {
+    flex-direction: column-reverse;
+  }
+
+  .btnCancelar,
+  .btnConfirmar {
+    width: 100%;
+    padding: 12px 20px;
+  }
+}
+
+/* CELULAR PEQUENO */
+
+@media (max-width: 420px) {
+  .headerDetalhe h1 {
+    font-size: 26px;
+  }
+
+  .headerDetalhe p {
+    font-size: 14px;
+  }
+
+  .resumoCard,
+  .cardInfo,
+  .cobrancaItem {
+    padding: 18px;
+  }
+
+  .cardInfo h2 {
+    font-size: 19px;
+  }
+
+  .resumoCard h3 {
+    font-size: 18px;
+  }
+
+  .cobrancaItem h3 {
+    font-size: 17px;
+  }
+
+  .editarButton {
+    padding: 13px 20px;
+    font-size: 15px;
+  }
 }

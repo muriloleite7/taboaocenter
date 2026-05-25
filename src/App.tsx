@@ -19,6 +19,7 @@ import EditarCobranca from "./pages/editarCobranca";
 import DetalheContrato from "./pages/detalheContrato";
 import RenovarContrato from "./pages/renovarContrato";
 import EditarContrato from "./pages/editarContrato";
+import NovoContrato from "./pages/novoContrato";
 
 
 export default function App() {
@@ -33,18 +34,18 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/inquilinos" element={<Inquilinos />} />
+          <Route path="/novo-inquilino" element={<NovoInquilino />} />
           <Route path="/inquilinos/:id" element={<DetalheInquilino />} />
           <Route path="/inquilinos/:id/editar" element={<EditarInquilino />} />
           <Route path="/cobrancas" element={<Cobrancas />} />
+          <Route path="/lancar-despesas" element={<LancarDespesas />} /> 
           <Route path="/cobrancas/:id/editar" element={<EditarCobranca />} />
           <Route path="/contratos" element={<Contratos />} />
-          <Route path="/contratos" element={<Contratos />} />
+          <Route path="/novo-contrato" element={<NovoContrato />} />
           <Route path="/contratos/:id" element={<DetalheContrato />} /> 
           <Route path="/contratos/:id/editar" element={<EditarContrato />} />
           <Route path="/contratos/:id/renovar" element={<RenovarContrato />} /> 
           <Route path="/configuracoes" element={<Configuracoes />} />
-          <Route path="/novo-inquilino" element={<NovoInquilino />} />
-          <Route path="/lancar-despesas" element={<LancarDespesas />} /> 
         </Route>
       </Routes>
     

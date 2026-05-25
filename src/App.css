@@ -8,3 +8,11 @@
   min-height: 100vh;
   padding: 32px;
 }
+
+@media (max-width: 900px) {
+  .main-content {
+    margin-left: 0;
+    padding: 82px 18px 24px;
+  }
+}
+

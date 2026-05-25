@@ -6,6 +6,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
 }
 
 .voltarLink {
@@ -70,13 +71,13 @@
 
 .gridCampos {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
 }
 
 .gridValores {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
   margin-bottom: 24px;
 }
@@ -85,6 +86,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
 .campoFull {
@@ -106,6 +108,7 @@
   background: #fcfcfd;
   transition: all 0.2s ease;
   color: #111827;
+  min-width: 0;
 }
 
 .inputForm {
@@ -161,6 +164,10 @@
   gap: 24px;
 }
 
+.pagamentoTexto {
+  min-width: 0;
+}
+
 .pagamentoTexto h3 {
   color: #111827;
   font-size: 16px;
@@ -193,11 +200,12 @@
   color: #4f46e5;
   font-size: 18px;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .resumoGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
 }
 
@@ -206,6 +214,7 @@
   border-radius: 14px;
   padding: 20px;
   background-color: #ffffff;
+  min-width: 0;
 }
 
 .resumoCard span {
@@ -219,6 +228,7 @@
   font-size: 20px;
   color: #111827;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .statusResumo {
@@ -262,4 +272,135 @@
 .botaoSalvar:hover,
 .botaoVoltar:hover {
   opacity: 0.9;
+}
+
+/* NOTEBOOK / TELA MÉDIA */
+
+@media (max-width: 1200px) {
+  .formularioCard {
+    padding: 32px;
+  }
+
+  .gridValores,
+  .resumoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+  .formularioCard {
+    padding: 28px;
+  }
+
+  .gridCampos,
+  .gridValores {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .campoFull {
+    grid-column: span 1;
+  }
+
+  .pagamentoInfo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pagamentoStatus {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* CELULAR */
+
+@media (max-width: 768px) {
+  .containerEditar {
+    padding-top: 12px;
+  }
+
+  .headerEditar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tituloEditar {
+    font-size: 28px;
+  }
+
+  .subtituloEditar {
+    font-size: 15px;
+  }
+
+  .avisoEdicao {
+    padding: 15px;
+  }
+
+  .formularioCard {
+    padding: 22px;
+    border-radius: 14px;
+  }
+
+  .secaoTitulo {
+    font-size: 24px;
+  }
+
+  .inputForm {
+    height: 46px;
+    font-size: 15px;
+  }
+
+  .resumoGrid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .areaBotoes {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .botaoVoltar,
+  .botaoSalvar {
+    width: 100%;
+    padding: 13px 20px;
+  }
+}
+
+/* CELULAR PEQUENO */
+
+@media (max-width: 420px) {
+  .tituloEditar {
+    font-size: 26px;
+  }
+
+  .subtituloEditar {
+    font-size: 14px;
+  }
+
+  .formularioCard {
+    padding: 18px;
+  }
+
+  .section {
+    padding-bottom: 28px;
+    margin-bottom: 28px;
+  }
+
+  .secaoTitulo {
+    font-size: 22px;
+  }
+
+  .avisoEdicao p,
+  .pagamentoTexto p,
+  .campoAjuda {
+    font-size: 13px;
+  }
+
+  .resumoCard {
+    padding: 18px;
+  }
 }
