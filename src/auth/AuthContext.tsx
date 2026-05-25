@@ -48,6 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 // Hook personalizado para facilitar o uso
-export function useAuth() {
+export function useAuth() { 
   return useContext(AuthContext);
 }
