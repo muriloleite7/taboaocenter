@@ -11,7 +11,7 @@ import {
   FiX,
   FiLogOut,
 } from "react-icons/fi";
-import { useAuth } from "../auth/authContext";
+import { useAuth } from "../auth/AuthContext";
 
 export default function Sidebar() {
   const { logout } = useAuth();

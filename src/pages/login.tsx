@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import styles from '../style/auth.module.css';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../auth/authContext';
+import { useAuth } from '../auth/AuthContext';
 
 export default function Login() {
   const [dados, setDados] = useState({ email: '', senha: '' });
