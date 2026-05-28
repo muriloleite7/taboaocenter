@@ -172,7 +172,7 @@
 
 .tabelaCobrancas th {
   text-align: left;
-  padding: 18px 22px;
+  padding: 18px 20px;
   font-size: 14px;
   color: #64748b;
   font-weight: 700;
@@ -181,7 +181,7 @@
 }
 
 .tabelaCobrancas td {
-  padding: 18px 22px;
+  padding: 18px 20px;
   font-size: 14px;
   color: #0f172a;
   border-bottom: 1px solid #e5e7eb;
