@@ -5,6 +5,7 @@ import styles from "../style/inquilinos.module.css";
 import { inquilinosMock } from "../data/inquilinosMock";
 import { formatarMoeda, formatarData } from "../data/cobrancasMock";
 import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
+import { exportarParaCSV } from "../utils/exportarCSV";
 
 export default function Inquilinos() {
   const navigate = useNavigate();
@@ -71,6 +72,23 @@ export default function Inquilinos() {
 
     return bateBusca && bateStatus && bateTipo;
   });
+
+  // Função que lida com a exportação de Inquilinos
+  const handleExportar = () => {
+    const colunas = [
+      { chave: "nome", label: "Nome" },
+      { chave: "email", label: "E-mail" },
+      { chave: "cpf", label: "CPF" },
+      { chave: "telefone", label: "Telefone" },
+      { chave: "imovel", label: "Imóvel" },
+      { chave: "endereco", label: "Endereço" },
+      { chave: "aluguel", label: "Valor Aluguel" },
+      { chave: "vencimentoData", label: "Vencimento" },
+      { chave: "statusPagamento", label: "Status" },
+    ];
+
+    exportarParaCSV(inquilinosFiltrados, colunas, "relatorio_inquilinos");
+  };
 
   // Atualização dos totais usando a lista do estado
   const totalAtivos = listaInquilinos.length;
@@ -205,7 +223,7 @@ export default function Inquilinos() {
           </select>
         </div>
 
-        <button className={styles.exportButton}>⇩ Exportar</button>
+        <button onClick={handleExportar} className={styles.exportButton}>⇩ Exportar</button>
       </div>
 
       <div className={styles.tabelaContainer}>

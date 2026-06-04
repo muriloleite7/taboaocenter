@@ -6,6 +6,7 @@ import ModalConfirmacao from "../components/modal";
 import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 import { contratosMock } from "../data/contratosMock";
 import { inquilinosMock } from "../data/inquilinosMock";
+import { exportarParaCSV } from "../utils/exportarCSV";
 
 export default function Contratos() {
   const navigate = useNavigate();
@@ -60,6 +61,35 @@ export default function Contratos() {
 
     return bateBusca && bateStatus && batePeriodo;
   });
+
+  const handleExportar = () => {
+    const dadosParaExportar = contratosFiltrados.map((contrato: any) => {
+      const inquilino = listaInquilinos.find((i: any) => i.id === contrato.inquilinoId);
+      return {
+        id: contrato.id,
+        inquilinoNome: inquilino ? inquilino.nome : "Desconhecido",
+        inquilinoCpf: inquilino ? inquilino.cpf : "",
+        imovel: inquilino ? inquilino.imovel : "",
+        inicio: contrato.inicio,
+        fim: contrato.fim,
+        reajuste: contrato.reajuste || "Anual",
+        status: contrato.status,
+      };
+    });
+
+  const colunas = [
+      { chave: "id", label: "ID Contrato" },
+      { chave: "inquilinoNome", label: "Inquilino" },
+      { chave: "inquilinoCpf", label: "CPF" },
+      { chave: "imovel", label: "Imóvel" },
+      { chave: "inicio", label: "Data Início" },
+      { chave: "fim", label: "Data Fim" },
+      { chave: "reajuste", label: "Regra Reajuste" },
+      { chave: "status", label: "Status" },
+    ];
+
+    exportarParaCSV(dadosParaExportar, colunas, "relatorio_contratos");
+  };
 
   const alternarMenu = (id: string) => {
     setMenuAberto((menuAtual) => (menuAtual === id ? null : id));
@@ -144,7 +174,7 @@ export default function Contratos() {
             <option>Este mês</option>
           </select>
         </div>
-        <button className={styles.exportButton}>⇩ Exportar</button>
+        <button onClick={handleExportar} className={styles.exportButton}>⇩ Exportar</button>
       </div>
 
       <div className={styles.tabelaContainer}>

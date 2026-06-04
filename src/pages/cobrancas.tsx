@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Card from "../components/cards";
 import styles from "../style/cobrancas.module.css";
 import { Link } from "react-router-dom";
 import { inquilinosMock } from "../data/inquilinosMock";
 import { calcularMultaAutomatica, calcularSubtotal, cobrancasMock, formatarData, formatarMoeda, } from "../data/cobrancasMock";
 import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
+import { exportarParaCSV } from "../utils/exportarCSV";
 
 export default function Cobrancas() {
   const [listaCobrancas, setListaCobrancas] = useState(() => {
@@ -56,6 +57,49 @@ export default function Cobrancas() {
 
     return bateBusca && bateStatus && bateReferencia;
   });
+
+  // Função que lida com a exportação de Cobranças
+  const handleExportar = () => {
+    // Formata os dados brutos calculando totais e inserindo os dados do inquilino antes de mandar pro CSV
+    const dadosParaExportar = cobrancasFiltradas.map((cobranca: any) => {
+      const inquilino = listaInquilinos.find((i: any) => i.id === cobranca.inquilinoId);
+      const subtotal = calcularSubtotal(cobranca);
+      const multa = calcularMultaAutomatica(cobranca.status, subtotal);
+      const totalCalculado = subtotal + multa;
+
+      return {
+        inquilinoNome: inquilino ? inquilino.nome : "Desconhecido",
+        inquilinoCpf: inquilino ? inquilino.cpf : "",
+        imovel: inquilino ? inquilino.imovel : "",
+        referencia: cobranca.referencia,
+        aluguel: Number(cobranca.aluguel),
+        agua: cobranca.agua ? Number(cobranca.agua) : 0,
+        luz: cobranca.luz ? Number(cobranca.luz) : 0,
+        iptu: cobranca.iptu ? Number(cobranca.iptu) : 0,
+        multa: multa,
+        total: cobranca.status === "Despesas pendentes" ? "Aguardando despesas" : totalCalculado,
+        vencimento: formatarData(cobranca.vencimento),
+        status: cobranca.status,
+      };
+    });
+
+    const colunas = [
+      { chave: "inquilinoNome", label: "Inquilino" },
+      { chave: "inquilinoCpf", label: "CPF" },
+      { chave: "imovel", label: "Imóvel" },
+      { chave: "referencia", label: "Referência" },
+      { chave: "aluguel", label: "Aluguel" },
+      { chave: "agua", label: "Água" },
+      { chave: "luz", label: "Luz" },
+      { chave: "iptu", label: "IPTU" },
+      { chave: "multa", label: "Multa" },
+      { chave: "total", label: "Total" },
+      { chave: "vencimento", label: "Vencimento" },
+      { chave: "status", label: "Status" },
+    ];
+
+    exportarParaCSV(dadosParaExportar, colunas, "relatorio_cobrancas");
+  };
 
   const totalPendentes = listaCobrancas.filter(
     (cobranca: any) => cobranca.status === "Pendente",
@@ -183,7 +227,7 @@ export default function Cobrancas() {
           </select>
         </div>
 
-        <button className={styles.exportButton}>⇩ Exportar</button>
+        <button onClick={handleExportar} className={styles.exportButton}>⇩ Exportar</button>
       </div>
 
       <div className={styles.tabelaContainer}>
