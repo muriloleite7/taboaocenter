@@ -8,82 +8,217 @@ import { contratosMock } from "../data/contratosMock";
 import { inquilinosMock } from "../data/inquilinosMock";
 import { exportarParaCSV } from "../utils/exportarCSV";
 
+const CONTRATOS_STORAGE_KEY = "@TaboaoCenter:contratos";
+const INQUILINOS_STORAGE_KEY = "@TaboaoCenter:inquilinos";
+
+function calcularDiasRestantes(dataFim: string) {
+  if (!dataFim) return 0;
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const fim = new Date(dataFim);
+  fim.setHours(0, 0, 0, 0);
+
+  if (Number.isNaN(fim.getTime())) return 0;
+
+  const diferencaMs = fim.getTime() - hoje.getTime();
+  return Math.ceil(diferencaMs / (1000 * 60 * 60 * 24));
+}
+
+function formatarData(data: string) {
+  if (!data) return "—";
+
+  const dataObj = new Date(data);
+
+  if (Number.isNaN(dataObj.getTime())) {
+    return data;
+  }
+
+  return dataObj.toLocaleDateString("pt-BR", {
+    timeZone: "UTC",
+  });
+}
+
+function formatarMoeda(valor: number) {
+  return valor.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+function obterInicioContrato(contrato: any) {
+  return contrato.inicio || contrato.dataInicio || "";
+}
+
+function obterFimContrato(contrato: any) {
+  return contrato.fim || contrato.dataFim || "";
+}
+
+function obterAluguelContrato(contrato: any) {
+  return Number(contrato.valorAluguel || contrato.aluguel || 0);
+}
+
+function obterDiaVencimento(contrato: any) {
+  return contrato.diaVencimento || contrato.vencimento || "—";
+}
+
+function obterStatusContrato(contrato: any) {
+  if (contrato.status === "Encerrado") return "Encerrado";
+
+  const fim = obterFimContrato(contrato);
+  const diasRestantes = calcularDiasRestantes(fim);
+
+  if (diasRestantes < 0) return "Renovação pendente";
+  if (diasRestantes <= 30) return "Vence em breve";
+
+  return contrato.status || "Ativo";
+}
+
 export default function Contratos() {
   const navigate = useNavigate();
+
   const [busca, setBusca] = useState("");
   const [statusSelecionado, setStatusSelecionado] = useState("Todos");
   const [periodoSelecionado, setPeriodoSelecionado] = useState("Todos");
   const [menuAberto, setMenuAberto] = useState<string | null>(null);
 
-  // ESTADOS DO MODAL E USUÁRIO
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [contratoParaEncerrar, setContratoParaEncerrar] = useState<string | null>(null);
+  const [contratoParaEncerrar, setContratoParaEncerrar] = useState<string | null>(
+    null
+  );
+
   const isAdmin = usuarioLogadoMock.cargo === "admin";
 
-  // 1. CARREGANDO CONTRATOS DO LOCALSTORAGE
-  const [listaContratos] = useState(() => {
-    const salvos = localStorage.getItem("@TaboaoCenter:contratos");
-    if (salvos) return JSON.parse(salvos);
-    
-    // Se não tiver nada salvo, inicia com o mock e já salva
-    localStorage.setItem("@TaboaoCenter:contratos", JSON.stringify(contratosMock));
+  const [listaContratos, setListaContratos] = useState<any[]>(() => {
+    const salvos = localStorage.getItem(CONTRATOS_STORAGE_KEY);
+
+    if (salvos) {
+      return JSON.parse(salvos);
+    }
+
+    localStorage.setItem(CONTRATOS_STORAGE_KEY, JSON.stringify(contratosMock));
     return contratosMock;
   });
 
-  // 2. CARREGANDO INQUILINOS DO LOCALSTORAGE (para cruzar os dados corretamente)
-  const [listaInquilinos] = useState(() => {
-    const salvos = localStorage.getItem("@TaboaoCenter:inquilinos");
-    return salvos ? JSON.parse(salvos) : inquilinosMock;
+  const [listaInquilinos] = useState<any[]>(() => {
+    const salvos = localStorage.getItem(INQUILINOS_STORAGE_KEY);
+
+    if (salvos) {
+      return JSON.parse(salvos);
+    }
+
+    localStorage.setItem(INQUILINOS_STORAGE_KEY, JSON.stringify(inquilinosMock));
+    return inquilinosMock;
   });
 
-  // 3. ATUALIZANDO OS CONTADORES DOS CARDS PARA USAR A LISTA DINÂMICA
-  const totalAtivos = listaContratos.filter(
-    (c: any) => c.status === "Ativo" || c.status === "Vence em breve"
+  const contratosComStatus = listaContratos.map((contrato) => ({
+    ...contrato,
+    statusCalculado: obterStatusContrato(contrato),
+    diasRestantesCalculados: calcularDiasRestantes(obterFimContrato(contrato)),
+  }));
+
+  const totalAtivos = contratosComStatus.filter(
+    (contrato) =>
+      contrato.statusCalculado === "Ativo" ||
+      contrato.statusCalculado === "Vence em breve"
   ).length;
-  const totalVencemBreve = listaContratos.filter((c: any) => c.status === "Vence em breve").length;
-  const totalRenovacao = listaContratos.filter((c: any) => c.status === "Renovação pendente").length;
-  const totalEncerrados = listaContratos.filter((c: any) => c.status === "Encerrado").length;
 
-  // 4. ATUALIZANDO O FILTRO PARA USAR A LISTA DINÂMICA E BUSCAR O INQUILINO NO STATE
-  const contratosFiltrados = listaContratos.filter((contrato: any) => {
-    const inquilino = listaInquilinos.find((i: any) => i.id === contrato.inquilinoId);
-    if (!inquilino) return false;
+  const totalVencemBreve = contratosComStatus.filter(
+    (contrato) => contrato.statusCalculado === "Vence em breve"
+  ).length;
 
-    const textoBusca = `${inquilino.nome} ${inquilino.email} ${inquilino.cpf} ${inquilino.imovel} ${inquilino.endereco} ${contrato.status} ${contrato.inicio} ${contrato.fim}`.toLowerCase();
-    
+  const totalRenovacao = contratosComStatus.filter(
+    (contrato) => contrato.statusCalculado === "Renovação pendente"
+  ).length;
+
+  const totalEncerrados = contratosComStatus.filter(
+    (contrato) => contrato.statusCalculado === "Encerrado"
+  ).length;
+
+  const contratosFiltrados = contratosComStatus.filter((contrato: any) => {
+    const inquilino = listaInquilinos.find(
+      (i: any) => String(i.id) === String(contrato.inquilinoId)
+    );
+
+    const nomeInquilino =
+      inquilino?.nome || contrato.inquilinoNome || "Inquilino não encontrado";
+
+    const cpfInquilino = inquilino?.cpf || "";
+    const emailInquilino = inquilino?.email || "";
+    const imovelContrato = contrato.imovel || inquilino?.imovel || "";
+    const enderecoContrato = contrato.endereco || inquilino?.endereco || "";
+
+    const textoBusca = `
+      ${nomeInquilino}
+      ${cpfInquilino}
+      ${emailInquilino}
+      ${imovelContrato}
+      ${enderecoContrato}
+      ${contrato.statusCalculado}
+      ${obterInicioContrato(contrato)}
+      ${obterFimContrato(contrato)}
+      ${contrato.tipoContrato || ""}
+      ${contrato.tipoGarantia || ""}
+    `.toLowerCase();
+
     const bateBusca = textoBusca.includes(busca.toLowerCase());
-    const bateStatus = statusSelecionado === "Todos" || contrato.status === statusSelecionado;
+
+    const bateStatus =
+      statusSelecionado === "Todos" ||
+      contrato.statusCalculado === statusSelecionado;
+
     const batePeriodo =
       periodoSelecionado === "Todos" ||
-      (periodoSelecionado === "Próximos 30 dias" && contrato.status === "Vence em breve") ||
-      (periodoSelecionado === "Próximos 60 dias" && contrato.status !== "Encerrado") ||
-      (periodoSelecionado === "Este mês" && contrato.status !== "Encerrado");
+      (periodoSelecionado === "Próximos 30 dias" &&
+        contrato.diasRestantesCalculados >= 0 &&
+        contrato.diasRestantesCalculados <= 30) ||
+      (periodoSelecionado === "Próximos 60 dias" &&
+        contrato.diasRestantesCalculados >= 0 &&
+        contrato.diasRestantesCalculados <= 60) ||
+      (periodoSelecionado === "Este mês" &&
+        contrato.diasRestantesCalculados >= 0 &&
+        contrato.diasRestantesCalculados <= 31);
 
     return bateBusca && bateStatus && batePeriodo;
   });
 
   const handleExportar = () => {
     const dadosParaExportar = contratosFiltrados.map((contrato: any) => {
-      const inquilino = listaInquilinos.find((i: any) => i.id === contrato.inquilinoId);
+      const inquilino = listaInquilinos.find(
+        (i: any) => String(i.id) === String(contrato.inquilinoId)
+      );
+
       return {
         id: contrato.id,
-        inquilinoNome: inquilino ? inquilino.nome : "Desconhecido",
-        inquilinoCpf: inquilino ? inquilino.cpf : "",
-        imovel: inquilino ? inquilino.imovel : "",
-        inicio: contrato.inicio,
-        fim: contrato.fim,
+        inquilinoNome:
+          inquilino?.nome || contrato.inquilinoNome || "Desconhecido",
+        inquilinoCpf: inquilino?.cpf || "",
+        imovel: contrato.imovel || inquilino?.imovel || "",
+        aluguel: obterAluguelContrato(contrato),
+        diaVencimento: obterDiaVencimento(contrato),
+        inicio: formatarData(obterInicioContrato(contrato)),
+        fim: formatarData(obterFimContrato(contrato)),
+        diasRestantes: contrato.diasRestantesCalculados,
+        tipoContrato: contrato.tipoContrato || "Não informado",
+        cobrancaAutomatica: contrato.cobrancaAutomatica ? "Sim" : "Não",
         reajuste: contrato.reajuste || "Anual",
-        status: contrato.status,
+        status: contrato.statusCalculado,
       };
     });
 
-  const colunas = [
+    const colunas = [
       { chave: "id", label: "ID Contrato" },
       { chave: "inquilinoNome", label: "Inquilino" },
       { chave: "inquilinoCpf", label: "CPF" },
       { chave: "imovel", label: "Imóvel" },
+      { chave: "aluguel", label: "Aluguel" },
+      { chave: "diaVencimento", label: "Dia Vencimento" },
       { chave: "inicio", label: "Data Início" },
       { chave: "fim", label: "Data Fim" },
+      { chave: "diasRestantes", label: "Dias Restantes" },
+      { chave: "tipoContrato", label: "Tipo" },
+      { chave: "cobrancaAutomatica", label: "Cobrança Automática" },
       { chave: "reajuste", label: "Regra Reajuste" },
       { chave: "status", label: "Status" },
     ];
@@ -96,7 +231,7 @@ export default function Contratos() {
   };
 
   const handleEnviarAviso = (id: string) => {
-    alert(`Aqui futuramente será enviado um aviso sobre o contrato ${id}.`);
+    alert(`Mensagem de aviso preparada para o contrato ${id}.`);
     setMenuAberto(null);
   };
 
@@ -107,7 +242,30 @@ export default function Contratos() {
   };
 
   const confirmarEncerramentoTabela = () => {
-    alert(`O contrato ${contratoParaEncerrar} foi marcado como encerrado! (Futuro back-end)`);
+    if (!contratoParaEncerrar) return;
+
+    const contratosAtualizados = listaContratos.map((contrato) => {
+      if (String(contrato.id) !== String(contratoParaEncerrar)) {
+        return contrato;
+      }
+
+      return {
+        ...contrato,
+        status: "Encerrado",
+        cobrancaAutomatica: false,
+        dataEncerramento: new Date().toISOString(),
+      };
+    });
+
+    setListaContratos(contratosAtualizados);
+
+    localStorage.setItem(
+      CONTRATOS_STORAGE_KEY,
+      JSON.stringify(contratosAtualizados)
+    );
+
+    alert(`Contrato ${contratoParaEncerrar} encerrado com sucesso.`);
+
     setIsModalOpen(false);
     setContratoParaEncerrar(null);
   };
@@ -117,29 +275,54 @@ export default function Contratos() {
       <div className={styles.headerContratos}>
         <div>
           <h1 className={styles.tituloContratos}>Contratos</h1>
+
           <p className={styles.subtituloContratos}>
-            Controle os contratos, vencimentos e renovações da imobiliária.
+            Controle contratos, vencimentos, renovações e cobrança automática.
           </p>
         </div>
 
-        <button onClick={() => navigate("/novo-contrato")} className={styles.novoContrato}>
+        <button
+          type="button"
+          onClick={() => navigate("/novo-contrato")}
+          className={styles.novoContrato}
+        >
           + Novo contrato
         </button>
       </div>
 
       <div className={styles.cardsContratos}>
-        <Card title="Contratos ativos" value={totalAtivos} description="Em andamento" />
-        <Card title="Vencem em 30 dias" value={totalVencemBreve} description="Precisam de atenção" />
-        <Card title="Renovação pendente" value={totalRenovacao} description="Aguardando retorno" />
-        <Card title="Encerrados" value={totalEncerrados} description="Contratos finalizados" />
+        <Card
+          title="Contratos ativos"
+          value={totalAtivos}
+          description="Gerando cobranças"
+        />
+
+        <Card
+          title="Vencem em 30 dias"
+          value={totalVencemBreve}
+          description="Precisam de atenção"
+        />
+
+        <Card
+          title="Renovação pendente"
+          value={totalRenovacao}
+          description="Contratos vencidos"
+        />
+
+        <Card
+          title="Encerrados"
+          value={totalEncerrados}
+          description="Contratos finalizados"
+        />
       </div>
 
       <div className={styles.filtrosContratos}>
         <div className={styles.searchBox}>
           <span className={styles.searchIcon}>⌕</span>
+
           <input
             type="text"
-            placeholder="Buscar por inquilino, CPF ou imóvel..."
+            placeholder="Buscar por inquilino, CPF, imóvel ou tipo..."
             className={styles.searchInput}
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
@@ -148,6 +331,7 @@ export default function Contratos() {
 
         <div className={styles.filterGroup}>
           <label>Status</label>
+
           <select
             className={styles.selectFilter}
             value={statusSelecionado}
@@ -163,6 +347,7 @@ export default function Contratos() {
 
         <div className={styles.filterGroup}>
           <label>Período</label>
+
           <select
             className={styles.selectFilter}
             value={periodoSelecionado}
@@ -174,7 +359,14 @@ export default function Contratos() {
             <option>Este mês</option>
           </select>
         </div>
-        <button onClick={handleExportar} className={styles.exportButton}>⇩ Exportar</button>
+
+        <button
+          type="button"
+          onClick={handleExportar}
+          className={styles.exportButton}
+        >
+          ⇩ Exportar
+        </button>
       </div>
 
       <div className={styles.tabelaContainer}>
@@ -184,6 +376,8 @@ export default function Contratos() {
               <th>Inquilino</th>
               <th>CPF</th>
               <th>Imóvel</th>
+              <th>Aluguel</th>
+              <th>Vencimento</th>
               <th>Início</th>
               <th>Fim</th>
               <th>Dias restantes</th>
@@ -191,53 +385,81 @@ export default function Contratos() {
               <th>Ações</th>
             </tr>
           </thead>
+
           <tbody>
             {contratosFiltrados.map((contrato: any) => {
-              const inquilino = listaInquilinos.find((i: any) => i.id === contrato.inquilinoId);
-              if (!inquilino) return null;
+              const inquilino = listaInquilinos.find(
+                (i: any) => String(i.id) === String(contrato.inquilinoId)
+              );
+
+              const nomeInquilino =
+                inquilino?.nome || contrato.inquilinoNome || "Desconhecido";
+
+              const emailInquilino = inquilino?.email || "";
+              const cpfInquilino = inquilino?.cpf || "—";
+              const imovelContrato = contrato.imovel || inquilino?.imovel || "—";
+              const enderecoContrato =
+                contrato.endereco || inquilino?.endereco || "";
+              const aluguelContrato = obterAluguelContrato(contrato);
+              const diaVencimento = obterDiaVencimento(contrato);
+              const inicio = obterInicioContrato(contrato);
+              const fim = obterFimContrato(contrato);
 
               return (
                 <tr key={contrato.id}>
                   <td>
                     <div className={styles.infoContrato}>
                       <div className={styles.avatarContrato}>
-                        {inquilino.nome
+                        {nomeInquilino
                           .split(" ")
                           .map((parteNome: string) => parteNome[0])
                           .join("")
                           .slice(0, 2)}
                       </div>
+
                       <div>
-                        <strong>{inquilino.nome}</strong>
-                        <span>{inquilino.email}</span>
+                        <strong>{nomeInquilino}</strong>
+                        <span>{emailInquilino}</span>
                       </div>
                     </div>
                   </td>
-                  <td>{inquilino.cpf}</td>
+
+                  <td>{cpfInquilino}</td>
+
                   <td>
                     <div className={styles.infoImovel}>
-                      <strong>{inquilino.imovel}</strong>
-                      <span>{inquilino.endereco}</span>
+                      <strong>{imovelContrato}</strong>
+                      <span>{enderecoContrato}</span>
                     </div>
                   </td>
-                  <td>{contrato.inicio}</td>
-                  <td>{contrato.fim}</td>
-                  <td>{contrato.diasRestantes}</td>
+
+                  <td>{formatarMoeda(aluguelContrato)}</td>
+                  <td>Dia {diaVencimento}</td>
+                  <td>{formatarData(inicio)}</td>
+                  <td>{formatarData(fim)}</td>
+
+                  <td>
+                    {contrato.diasRestantesCalculados < 0
+                      ? "Vencido"
+                      : contrato.diasRestantesCalculados}
+                  </td>
+
                   <td>
                     <span
                       className={
-                        contrato.status === "Ativo"
+                        contrato.statusCalculado === "Ativo"
                           ? styles.statusAtivo
-                          : contrato.status === "Vence em breve"
+                          : contrato.statusCalculado === "Vence em breve"
                             ? styles.statusVenceBreve
-                            : contrato.status === "Renovação pendente"
+                            : contrato.statusCalculado === "Renovação pendente"
                               ? styles.statusRenovacao
                               : styles.statusEncerrado
                       }
                     >
-                      {contrato.status}
+                      {contrato.statusCalculado}
                     </span>
                   </td>
+
                   <td>
                     <div className={styles.acoesTabela}>
                       <Link
@@ -247,6 +469,7 @@ export default function Contratos() {
                       >
                         👁
                       </Link>
+
                       <Link
                         to={`/contratos/${contrato.id}/editar`}
                         className={styles.botaoAcao}
@@ -263,30 +486,44 @@ export default function Contratos() {
                         >
                           ⋮
                         </button>
+
                         {menuAberto === contrato.id && (
                           <div className={styles.menuAcoes}>
                             <Link to={`/contratos/${contrato.id}/renovar`}>
                               Renovar contrato
                             </Link>
-                            <Link to={`/inquilinos/${inquilino.id}`}>
-                              Ver inquilino
-                            </Link>
+
+                            {inquilino && (
+                              <Link
+                                to={`/inquilinos/${inquilino.id}`}
+                                state={{
+                                  voltarPara: "/contratos",
+                                  textoVoltar: "← Voltar para contratos",
+                                }}
+                              >
+                                Ver inquilino
+                              </Link>
+                            )}
+
                             <button
                               type="button"
                               onClick={() => handleEnviarAviso(contrato.id)}
                             >
-                              Enviar aviso
+                              Preparar aviso
                             </button>
 
-                            {isAdmin && contrato.status !== "Encerrado" && (
-                              <button
-                                type="button"
-                                className={styles.acaoPerigosa}
-                                onClick={() => handleEncerrarContrato(contrato.id)}
-                              >
-                                Encerrar contrato
-                              </button>
-                            )}
+                            {isAdmin &&
+                              contrato.statusCalculado !== "Encerrado" && (
+                                <button
+                                  type="button"
+                                  className={styles.acaoPerigosa}
+                                  onClick={() =>
+                                    handleEncerrarContrato(contrato.id)
+                                  }
+                                >
+                                  Encerrar contrato
+                                </button>
+                              )}
                           </div>
                         )}
                       </div>
@@ -295,9 +532,10 @@ export default function Contratos() {
                 </tr>
               );
             })}
+
             {contratosFiltrados.length === 0 && (
               <tr>
-                <td colSpan={8} className={styles.semResultados}>
+                <td colSpan={10} className={styles.semResultados}>
                   Nenhum contrato encontrado.
                 </td>
               </tr>
@@ -307,8 +545,10 @@ export default function Contratos() {
 
         <div className={styles.rodapeTabela}>
           <span>
-            Mostrando {contratosFiltrados.length} de {listaContratos.length} contratos
+            Mostrando {contratosFiltrados.length} de {listaContratos.length}{" "}
+            contratos
           </span>
+
           <div className={styles.paginacao}>
             <button>{"<"}</button>
             <button className={styles.paginaAtiva}>1</button>
@@ -324,7 +564,7 @@ export default function Contratos() {
         onClose={() => setIsModalOpen(false)}
         onConfirm={confirmarEncerramentoTabela}
         titulo="Confirmar Encerramento"
-        mensagem={`Tem certeza que deseja encerrar o contrato #${contratoParaEncerrar}? Esta ação interromperá as cobranças e o status passará para Encerrado.`}
+        mensagem={`Tem certeza que deseja encerrar o contrato #${contratoParaEncerrar}? Esta ação interromperá as cobranças automáticas e o status passará para Encerrado.`}
         textoConfirmar="Sim, encerrar"
       />
     </div>

@@ -108,6 +108,12 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
 }
 
+.campoAjuda {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .switchRow,
 .preferenceRow {
   display: flex;

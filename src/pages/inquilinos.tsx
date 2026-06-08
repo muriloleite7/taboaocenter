@@ -3,14 +3,15 @@ import { useNavigate, Link } from "react-router-dom";
 import Card from "../components/cards";
 import styles from "../style/inquilinos.module.css";
 import { inquilinosMock } from "../data/inquilinosMock";
-import { formatarMoeda, formatarData } from "../data/cobrancasMock";
+import { formatarMoeda } from "../data/cobrancasMock";
 import { usuarioLogadoMock } from "../data/usuarioLogadoMock";
 import { exportarParaCSV } from "../utils/exportarCSV";
+
+const INQUILINOS_STORAGE_KEY = "@TaboaoCenter:inquilinos";
 
 export default function Inquilinos() {
   const navigate = useNavigate();
 
-  // Estado para armazenar os inquilinos que vêm do LocalStorage
   const [listaInquilinos, setListaInquilinos] = useState<any[]>([]);
   const [busca, setBusca] = useState("");
   const [statusSelecionado, setStatusSelecionado] = useState("Todos");
@@ -19,46 +20,85 @@ export default function Inquilinos() {
 
   const isAdmin = usuarioLogadoMock.cargo === "admin";
 
-  // Carrega os dados do localStorage assim que a tela abre
   useEffect(() => {
-    const salvos = localStorage.getItem("@TaboaoCenter:inquilinos");
+    const salvos = localStorage.getItem(INQUILINOS_STORAGE_KEY);
 
     if (salvos) {
       setListaInquilinos(JSON.parse(salvos));
     } else {
-      // Se não tem nada no localStorage, salva o mock inicial lá
       setListaInquilinos(inquilinosMock);
-      localStorage.setItem("@TaboaoCenter:inquilinos", JSON.stringify(inquilinosMock));
+      localStorage.setItem(
+        INQUILINOS_STORAGE_KEY,
+        JSON.stringify(inquilinosMock)
+      );
     }
   }, []);
 
+  const salvarInquilinos = (novaLista: any[]) => {
+    setListaInquilinos(novaLista);
+    localStorage.setItem(INQUILINOS_STORAGE_KEY, JSON.stringify(novaLista));
+  };
+
   const getTipoImovel = (imovel: string) => {
-    if (imovel.toLowerCase().includes("casa")) return "Casa";
-    if (imovel.toLowerCase().includes("apto")) return "Apartamento";
+    const texto = imovel?.toLowerCase() || "";
+
+    if (texto.includes("casa")) return "Casa";
+    if (texto.includes("apto") || texto.includes("apartamento")) {
+      return "Apartamento";
+    }
+
     return "Comercial";
   };
 
-  const getStatusTabela = (statusPagamento: string) => {
-    if (statusPagamento === "Adimplente") return "Adimplente";
-    if (statusPagamento === "Pendente") return "Com pendência";
-    if (statusPagamento === "Com pendência") return "Com pendência";
-    if (statusPagamento === "Despesas pendentes") return "Com pendência";
+  const getStatusTabela = (inquilino: any) => {
+    if (inquilino.statusContrato === "Encerrado") return "Encerrado";
 
-    return statusPagamento;
+    if (inquilino.statusPagamento === "Adimplente") return "Adimplente";
+
+    if (
+      inquilino.statusPagamento === "Pendente" ||
+      inquilino.statusPagamento === "Com pendência" ||
+      inquilino.statusPagamento === "Despesas pendentes"
+    ) {
+      return "Com pendência";
+    }
+
+    return inquilino.statusPagamento || "Adimplente";
   };
 
-  // Filtra usando a lista do estado (listaInquilinos) em vez do mock direto
+  const formatarVencimentoInquilino = (inquilino: any) => {
+    const diaVencimento = inquilino.diaVencimento || inquilino.vencimento;
+
+    if (diaVencimento) {
+      return `Dia ${diaVencimento}`;
+    }
+
+    if (!inquilino.vencimentoData) {
+      return "—";
+    }
+
+    const data = new Date(inquilino.vencimentoData);
+
+    if (Number.isNaN(data.getTime())) {
+      return inquilino.vencimentoData;
+    }
+
+    return data.toLocaleDateString("pt-BR", {
+      timeZone: "UTC",
+    });
+  };
+
   const inquilinosFiltrados = listaInquilinos.filter((inquilino) => {
-    const statusTabela = getStatusTabela(inquilino.statusPagamento);
+    const statusTabela = getStatusTabela(inquilino);
     const tipoImovel = getTipoImovel(inquilino.imovel);
 
     const textoBusca = `
-      ${inquilino.nome}
-      ${inquilino.email}
-      ${inquilino.cpf}
-      ${inquilino.telefone}
-      ${inquilino.imovel}
-      ${inquilino.endereco}
+      ${inquilino.nome || ""}
+      ${inquilino.email || ""}
+      ${inquilino.cpf || ""}
+      ${inquilino.telefone || ""}
+      ${inquilino.imovel || ""}
+      ${inquilino.endereco || ""}
       ${statusTabela}
     `.toLowerCase();
 
@@ -73,8 +113,21 @@ export default function Inquilinos() {
     return bateBusca && bateStatus && bateTipo;
   });
 
-  // Função que lida com a exportação de Inquilinos
   const handleExportar = () => {
+    const dadosParaExportar = inquilinosFiltrados.map((inquilino) => ({
+      nome: inquilino.nome || "",
+      email: inquilino.email || "",
+      cpf: inquilino.cpf || "",
+      telefone: inquilino.telefone || "",
+      imovel: inquilino.imovel || "",
+      endereco: inquilino.endereco || "",
+      aluguel: inquilino.aluguel || 0,
+      vencimento: formatarVencimentoInquilino(inquilino),
+      diaVencimento: inquilino.diaVencimento || inquilino.vencimento || "",
+      statusPagamento: getStatusTabela(inquilino),
+      statusContrato: inquilino.statusContrato || "Ativo",
+    }));
+
     const colunas = [
       { chave: "nome", label: "Nome" },
       { chave: "email", label: "E-mail" },
@@ -83,22 +136,25 @@ export default function Inquilinos() {
       { chave: "imovel", label: "Imóvel" },
       { chave: "endereco", label: "Endereço" },
       { chave: "aluguel", label: "Valor Aluguel" },
-      { chave: "vencimentoData", label: "Vencimento" },
-      { chave: "statusPagamento", label: "Status" },
+      { chave: "vencimento", label: "Vencimento" },
+      { chave: "diaVencimento", label: "Dia Vencimento" },
+      { chave: "statusPagamento", label: "Status Pagamento" },
+      { chave: "statusContrato", label: "Status Contrato" },
     ];
 
-    exportarParaCSV(inquilinosFiltrados, colunas, "relatorio_inquilinos");
+    exportarParaCSV(dadosParaExportar, colunas, "relatorio_inquilinos");
   };
 
-  // Atualização dos totais usando a lista do estado
-  const totalAtivos = listaInquilinos.length;
+  const totalAtivos = listaInquilinos.filter(
+    (inquilino) => inquilino.statusContrato !== "Encerrado"
+  ).length;
 
   const totalAdimplentes = listaInquilinos.filter(
-    (inquilino) => getStatusTabela(inquilino.statusPagamento) === "Adimplente"
+    (inquilino) => getStatusTabela(inquilino) === "Adimplente"
   ).length;
 
   const totalPendentes = listaInquilinos.filter(
-    (inquilino) => getStatusTabela(inquilino.statusPagamento) === "Com pendência"
+    (inquilino) => getStatusTabela(inquilino) === "Com pendência"
   ).length;
 
   const totalEncerrados = listaInquilinos.filter(
@@ -109,31 +165,67 @@ export default function Inquilinos() {
     setMenuAberto((menuAtual) => (menuAtual === id ? null : id));
   };
 
-  const handleVerCobrancas = (nome: string) => {
-    alert(`Aqui futuramente abrirá as cobranças de ${nome}.`);
+  const handleVerCobrancas = (id: string) => {
+    navigate("/cobrancas", {
+      state: {
+        inquilinoId: id,
+      },
+    });
+
     setMenuAberto(null);
   };
 
-  const handleEncerrarContrato = (nome: string) => {
+  const handleEncerrarContrato = (id: string, nome: string) => {
     const confirmar = window.confirm(
-      `Tem certeza que deseja encerrar o contrato de ${nome}? Essa ação deve ser feita apenas por um administrador.`
+      `Tem certeza que deseja encerrar o contrato de ${nome}?`
     );
 
     if (!confirmar) return;
+
+    const novaLista = listaInquilinos.map((inquilino) => {
+      if (String(inquilino.id) !== String(id)) {
+        return inquilino;
+      }
+
+      return {
+        ...inquilino,
+        statusContrato: "Encerrado",
+        statusPagamento: "Adimplente",
+        dataEncerramento: new Date().toISOString(),
+      };
+    });
+
+    salvarInquilinos(novaLista);
+    setMenuAberto(null);
 
     alert(`Contrato de ${nome} encerrado com sucesso.`);
-    setMenuAberto(null);
   };
 
-  const handleArquivarInquilino = (nome: string) => {
+  const handleArquivarInquilino = (id: string, nome: string) => {
     const confirmar = window.confirm(
-      `Tem certeza que deseja arquivar ${nome}? O histórico será mantido, mas o inquilino ficará inativo.`
+      `Tem certeza que deseja arquivar ${nome}? O histórico será mantido.`
     );
 
     if (!confirmar) return;
 
-    alert(`${nome} foi arquivado com sucesso.`);
+    const novaLista = listaInquilinos.map((inquilino) => {
+      if (String(inquilino.id) !== String(id)) {
+        return inquilino;
+      }
+
+      return {
+        ...inquilino,
+        arquivado: true,
+        statusContrato: "Encerrado",
+        statusPagamento: "Adimplente",
+        dataArquivamento: new Date().toISOString(),
+      };
+    });
+
+    salvarInquilinos(novaLista);
     setMenuAberto(null);
+
+    alert(`${nome} foi arquivado com sucesso.`);
   };
 
   return (
@@ -141,12 +233,14 @@ export default function Inquilinos() {
       <div className={styles.headerInquilinos}>
         <div>
           <h1 className={styles.tituloInquilinos}>Inquilinos</h1>
+
           <p className={styles.subtituloInquilinos}>
             Gerencie os inquilinos da imobiliária.
           </p>
         </div>
 
         <button
+          type="button"
           onClick={() => navigate("/novo-inquilino")}
           className={styles.novoInquilino}
         >
@@ -158,7 +252,7 @@ export default function Inquilinos() {
         <Card
           title="Inquilinos ativos"
           value={totalAtivos}
-          description="Cadastrados no sistema"
+          description="Com contrato em andamento"
         />
 
         <Card
@@ -223,7 +317,13 @@ export default function Inquilinos() {
           </select>
         </div>
 
-        <button onClick={handleExportar} className={styles.exportButton}>⇩ Exportar</button>
+        <button
+          type="button"
+          onClick={handleExportar}
+          className={styles.exportButton}
+        >
+          ⇩ Exportar
+        </button>
       </div>
 
       <div className={styles.tabelaContainer}>
@@ -243,14 +343,14 @@ export default function Inquilinos() {
 
           <tbody>
             {inquilinosFiltrados.map((inquilino) => {
-              const statusTabela = getStatusTabela(inquilino.statusPagamento);
+              const statusTabela = getStatusTabela(inquilino);
 
               return (
                 <tr key={inquilino.id}>
                   <td>
                     <div className={styles.infoInquilino}>
                       <div className={styles.avatarInquilino}>
-                        {inquilino.nome
+                        {(inquilino.nome || "?")
                           .split(" ")
                           .map((parteNome: string) => parteNome[0])
                           .join("")
@@ -274,8 +374,8 @@ export default function Inquilinos() {
                     </div>
                   </td>
 
-                  <td>{formatarMoeda(Number(inquilino.aluguel))}</td>
-                  <td>{formatarData(inquilino.vencimentoData)}</td>
+                  <td>{formatarMoeda(Number(inquilino.aluguel || 0))}</td>
+                  <td>{formatarVencimentoInquilino(inquilino)}</td>
 
                   <td>
                     <span
@@ -305,6 +405,10 @@ export default function Inquilinos() {
 
                       <Link
                         to={`/inquilinos/${inquilino.id}/editar`}
+                        state={{
+                          voltarPara: "/inquilinos",
+                          textoVoltar: "← Voltar para inquilinos",
+                        }}
                         className={styles.botaoAcao}
                         title="Editar"
                       >
@@ -324,7 +428,7 @@ export default function Inquilinos() {
                           <div className={styles.menuAcoes}>
                             <button
                               type="button"
-                              onClick={() => handleVerCobrancas(inquilino.nome)}
+                              onClick={() => handleVerCobrancas(inquilino.id)}
                             >
                               Ver cobranças
                             </button>
@@ -334,7 +438,10 @@ export default function Inquilinos() {
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    handleEncerrarContrato(inquilino.nome)
+                                    handleEncerrarContrato(
+                                      inquilino.id,
+                                      inquilino.nome
+                                    )
                                   }
                                 >
                                   Encerrar contrato
@@ -344,7 +451,10 @@ export default function Inquilinos() {
                                   type="button"
                                   className={styles.acaoPerigosa}
                                   onClick={() =>
-                                    handleArquivarInquilino(inquilino.nome)
+                                    handleArquivarInquilino(
+                                      inquilino.id,
+                                      inquilino.nome
+                                    )
                                   }
                                 >
                                   Arquivar inquilino
@@ -377,11 +487,13 @@ export default function Inquilinos() {
           </span>
 
           <div className={styles.paginacao}>
-            <button>{"<"}</button>
-            <button className={styles.paginaAtiva}>1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>{">"}</button>
+            <button type="button">{"<"}</button>
+            <button type="button" className={styles.paginaAtiva}>
+              1
+            </button>
+            <button type="button">2</button>
+            <button type="button">3</button>
+            <button type="button">{">"}</button>
           </div>
         </div>
       </div>

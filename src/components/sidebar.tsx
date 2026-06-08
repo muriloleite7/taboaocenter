@@ -74,6 +74,7 @@ export default function Sidebar() {
         <nav className={styles.menu}>
           <NavLink
             to="/"
+            end
             onClick={fecharSidebar}
             className={({ isActive }) =>
               isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem
@@ -107,6 +108,7 @@ export default function Sidebar() {
 
           <NavLink
             to="/contratos"
+            end
             onClick={fecharSidebar}
             className={({ isActive }) =>
               isActive ? `${styles.menuItem} ${styles.active}` : styles.menuItem

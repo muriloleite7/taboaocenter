@@ -2,14 +2,20 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../style/novoInquilino.module.css";
 
+const INQUILINOS_STORAGE_KEY = "@TaboaoCenter:inquilinos";
+
 export default function NovoInquilino() {
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     nome: "",
     cpf: "",
     telefone: "",
     email: "",
+
+    emergenciaNome: "",
+    emergenciaTel: "",
+
     imovel: "",
     aluguel: "",
     vencimento: "",
@@ -33,15 +39,57 @@ export default function NovoInquilino() {
     numero: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const maskCPF = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .substring(0, 14);
+  };
+
+  const maskPhone = (value: string) => {
+    return value
+      .replace(/\D/g, "")
+      .replace(/(\d{2})(\d)/, "($1) $2")
+      .replace(/(\d{5})(\d)/, "$1-$2")
+      .substring(0, 15);
+  };
+
+  const montarDataVencimento = () => {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = hoje.getMonth();
+
+    const dia = Number(formData.vencimento || 1);
+
+    return new Date(ano, mes, dia).toISOString();
+  };
+
+  const montarEndereco = () => {
+    const partes = [
+      formData.rua,
+      formData.numero,
+      formData.bairro,
+      formData.cidade,
+      formData.uf,
+    ].filter(Boolean);
+
+    return partes.join(" - ");
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
+
     let formattedValue = value;
 
-    // 1. Lógica das Máscaras (CPF e Telefone)
     if (name === "cpf") formattedValue = maskCPF(value);
-    if (name === "telefone") formattedValue = maskPhone(value);
+    if (name === "telefone" || name === "emergenciaTel") {
+      formattedValue = maskPhone(value);
+    }
 
-    // 2. Limpeza Automática do Endereço
     if (name === "cep" && value === "") {
       setFormData((prev) => ({
         ...prev,
@@ -63,51 +111,86 @@ export default function NovoInquilino() {
   const handleSalvar = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Cria o objeto do novo inquilino com base no form
+    if (!formData.nome.trim()) {
+      alert("Informe o nome do inquilino.");
+      return;
+    }
+
+    if (!formData.imovel.trim()) {
+      alert("Informe o imóvel vinculado.");
+      return;
+    }
+
+    if (!formData.aluguel || Number(formData.aluguel) <= 0) {
+      alert("Informe um valor de aluguel válido.");
+      return;
+    }
+
+    if (
+      !formData.vencimento ||
+      Number(formData.vencimento) < 1 ||
+      Number(formData.vencimento) > 31
+    ) {
+      alert("Informe um dia de vencimento entre 1 e 31.");
+      return;
+    }
+
     const novoRegistro = {
-      id: Math.random().toString(36).substring(2, 11), // ID aleatório temporário
+      id: `inq_${Date.now()}`,
+
       nome: formData.nome,
       email: formData.email,
       cpf: formData.cpf,
       telefone: formData.telefone,
+
+      emergenciaNome: formData.emergenciaNome,
+      emergenciaTel: formData.emergenciaTel,
+
       imovel: formData.imovel,
-      endereco: formData.rua ? `${formData.rua}, ${formData.numero} - ${formData.bairro}` : "",
-      aluguel: formData.aluguel,
-      vencimentoData: formData.dataInicio || new Date().toISOString(), // Usa dataInicio ou data atual
+      endereco: montarEndereco(),
+
+      cep: formData.cep,
+      rua: formData.rua,
+      bairro: formData.bairro,
+      cidade: formData.cidade,
+      uf: formData.uf,
+      numero: formData.numero,
+
+      aluguel: Number(formData.aluguel),
+
+      vencimento: Number(formData.vencimento),
+      diaVencimento: Number(formData.vencimento),
+      vencimentoTexto: `Dia ${formData.vencimento}`,
+      vencimentoData: montarDataVencimento(),
+
+      dataInicio: formData.dataInicio,
+      dataFim: formData.dataFim,
+
+      aguaTipo: formData.aguaTipo,
+      aguaValor: Number(formData.aguaValor || 0),
+
+      luzTipo: formData.luzTipo,
+      luzValor: Number(formData.luzValor || 0),
+
+      iptuTipo: formData.iptuTipo,
+      iptuValor: Number(formData.iptuValor || 0),
+
       statusPagamento: "Adimplente",
       statusContrato: "Ativo",
+
+      dataCadastro: new Date().toISOString(),
     };
 
-    // Pega a lista atual do localStorage (ou array vazio se não existir)
-    const listaAtual = JSON.parse(localStorage.getItem("@TaboaoCenter:inquilinos") || "[]");
-    
-    // Adiciona o novo registro no início da lista
+    const listaAtual = JSON.parse(
+      localStorage.getItem(INQUILINOS_STORAGE_KEY) || "[]"
+    );
+
     const novaLista = [novoRegistro, ...listaAtual];
-    
-    // Salva a lista atualizada no localStorage
-    localStorage.setItem("@TaboaoCenter:inquilinos", JSON.stringify(novaLista));
+
+    localStorage.setItem(INQUILINOS_STORAGE_KEY, JSON.stringify(novaLista));
 
     alert("Inquilino cadastrado com sucesso!");
-    navigate("/inquilinos"); // Redireciona de volta para a lista
-  };
-
-  // Remove tudo que não é número e aplica a máscara de CPF
-  const maskCPF = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
-      .substring(0, 14);
-  };
-
-  // Máscara de Telefone (11) 99999-9999
-  const maskPhone = (value: string) => {
-    return value
-      .replace(/\D/g, "")
-      .replace(/(\d{2})(\d)/, "($1) $2")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .substring(0, 15);
+    navigate("/inquilinos");
   };
 
   const checkCEP = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -129,7 +212,9 @@ export default function NovoInquilino() {
           }));
         }
       })
-      .catch((err) => console.error("Erro ao buscar CEP:", err));
+      .catch(() => {
+        alert("Não foi possível buscar o CEP agora.");
+      });
   };
 
   return (
@@ -137,6 +222,7 @@ export default function NovoInquilino() {
       <div className={styles.headerHome}>
         <div>
           <h1 className={styles.tituloHome}>Cadastrar Inquilino</h1>
+
           <p className={styles.subtituloHome}>
             Adicione um novo morador e configure contrato e cobranças.
           </p>
@@ -149,6 +235,7 @@ export default function NovoInquilino() {
 
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>Nome completo</label>
+
             <input
               type="text"
               name="nome"
@@ -162,6 +249,7 @@ export default function NovoInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>CPF</label>
+
             <input
               type="text"
               name="cpf"
@@ -174,6 +262,7 @@ export default function NovoInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>WhatsApp para contato</label>
+
             <input
               type="text"
               name="telefone"
@@ -186,6 +275,7 @@ export default function NovoInquilino() {
 
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>E-mail</label>
+
             <input
               type="email"
               name="email"
@@ -199,23 +289,29 @@ export default function NovoInquilino() {
 
         <div className={styles.gridCampos}>
           <h3 className={styles.secaoTitulo}>Contato de emergência</h3>
+
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Nome do contato</label>
+
             <input
               type="text"
               name="emergenciaNome"
               className={styles.inputForm}
-              placeholder="Ex: Maria (Mãe)"
+              placeholder="Ex: Maria"
+              value={formData.emergenciaNome}
               onChange={handleChange}
             />
           </div>
+
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Telefone de emergência</label>
+
             <input
               type="text"
               name="emergenciaTel"
               className={styles.inputForm}
               placeholder="(11) 90000-0000"
+              value={formData.emergenciaTel}
               onChange={handleChange}
             />
           </div>
@@ -223,11 +319,12 @@ export default function NovoInquilino() {
 
         <div className={styles.gridCampos}>
           <h3 className={styles.secaoTitulo}>
-            Endereço de residência (Inquilino)
+            Endereço de residência do inquilino
           </h3>
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>CEP</label>
+
             <input
               type="text"
               name="cep"
@@ -241,6 +338,7 @@ export default function NovoInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Rua</label>
+
             <input
               type="text"
               name="rua"
@@ -252,6 +350,7 @@ export default function NovoInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Bairro</label>
+
             <input
               type="text"
               name="bairro"
@@ -263,6 +362,7 @@ export default function NovoInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Número / Comp.</label>
+
             <input
               type="text"
               name="numero"
@@ -278,6 +378,7 @@ export default function NovoInquilino() {
 
           <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
             <label className={styles.labelForm}>Imóvel vinculado</label>
+
             <input
               type="text"
               name="imovel"
@@ -285,11 +386,13 @@ export default function NovoInquilino() {
               placeholder="Ex: Apto 203 - Bloco B"
               value={formData.imovel}
               onChange={handleChange}
+              required
             />
           </div>
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Valor do aluguel</label>
+
             <input
               type="number"
               name="aluguel"
@@ -297,11 +400,13 @@ export default function NovoInquilino() {
               placeholder="Ex: 1200"
               value={formData.aluguel}
               onChange={handleChange}
+              required
             />
           </div>
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Dia do vencimento</label>
+
             <input
               type="number"
               name="vencimento"
@@ -311,11 +416,13 @@ export default function NovoInquilino() {
               max="31"
               value={formData.vencimento}
               onChange={handleChange}
+              required
             />
           </div>
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Data de início</label>
+
             <input
               type="date"
               name="dataInicio"
@@ -327,6 +434,7 @@ export default function NovoInquilino() {
 
           <div className={styles.campoGrupo}>
             <label className={styles.labelForm}>Data de fim</label>
+
             <input
               type="date"
               name="dataFim"
@@ -339,6 +447,7 @@ export default function NovoInquilino() {
 
         <div className={styles.despesasCard}>
           <h3 className={styles.secaoTitulo}>Despesas do contrato</h3>
+
           <p className={styles.textoAjuda}>
             Defina se água, luz e IPTU serão fixos, variáveis ou se não serão
             cobrados neste contrato.
@@ -436,7 +545,7 @@ export default function NovoInquilino() {
           <button
             type="button"
             className={styles.botaoVoltar}
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/inquilinos")}
           >
             Cancelar
           </button>

@@ -1,25 +1,31 @@
 import { useState, useEffect } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { getInquilinoById } from "../data/inquilinosMock";
+import { inquilinosMock } from "../data/inquilinosMock";
 import {
   calcularMultaAutomatica,
   calcularSubtotal,
+  cobrancasMock,
   formatarMoeda,
-  getCobrancaById,
 } from "../data/cobrancasMock";
 import styles from "../style/editarCobranca.module.css";
+
+const COBRANCAS_STORAGE_KEY = "@TaboaoCenter:cobrancas";
+const INQUILINOS_STORAGE_KEY = "@TaboaoCenter:inquilinos";
+
+function dataHojeInput() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export default function EditarCobranca() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [existeDados, setExisteDados] = useState(true);
 
-  const [formData, setFormData] = useState({
+  const dadosIniciais = {
     nome: "",
     cpf: "",
     imovel: "",
+    inquilinoId: "",
     referencia: "",
     aluguel: "",
     agua: "",
@@ -31,38 +37,87 @@ export default function EditarCobranca() {
     dataPagamento: "",
     origemPagamento: "Automático",
     observacao: "",
-  });
+
+    plataformaPagamento: "Asaas",
+    statusAsaas: "Aguardando geração",
+    linkPagamento: "",
+    pixCopiaCola: "",
+    boletoLinhaDigitavel: "",
+    boletoUrl: "",
+    dataEnvioWhatsapp: "",
+  };
+
+  const [loading, setLoading] = useState(true);
+  const [existeDados, setExisteDados] = useState(true);
+  const [formData, setFormData] = useState(dadosIniciais);
+
+  const carregarCobrancas = () => {
+    const salvas = localStorage.getItem(COBRANCAS_STORAGE_KEY);
+
+    if (salvas) return JSON.parse(salvas);
+
+    localStorage.setItem(COBRANCAS_STORAGE_KEY, JSON.stringify(cobrancasMock));
+    return cobrancasMock;
+  };
+
+  const carregarInquilinos = () => {
+    const salvos = localStorage.getItem(INQUILINOS_STORAGE_KEY);
+
+    if (salvos) return JSON.parse(salvos);
+
+    localStorage.setItem(INQUILINOS_STORAGE_KEY, JSON.stringify(inquilinosMock));
+    return inquilinosMock;
+  };
 
   useEffect(() => {
-    const cobrancasSalvas = JSON.parse(localStorage.getItem("cobrancas_db") || "{}");
+    const listaCobrancas = carregarCobrancas();
+    const listaInquilinos = carregarInquilinos();
 
-    if (cobrancasSalvas[id!]) {
-      setFormData(cobrancasSalvas[id!]);
-    } else {
-      const cobrancaMock = getCobrancaById(id);
-      const inquilinoMock = getInquilinoById(cobrancaMock?.inquilinoId);
+    const cobrancaEncontrada = listaCobrancas.find(
+      (cobranca: any) => String(cobranca.id) === String(id)
+    );
 
-      if (cobrancaMock && inquilinoMock) {
-        setFormData({
-          nome: inquilinoMock.nome || "",
-          cpf: inquilinoMock.cpf || "",
-          imovel: inquilinoMock.imovel || "",
-          referencia: cobrancaMock.referencia || "",
-          aluguel: cobrancaMock.aluguel || "",
-          agua: cobrancaMock.agua || "",
-          luz: cobrancaMock.luz || "",
-          iptu: cobrancaMock.iptu || "",
-          vencimento: cobrancaMock.vencimento || "",
-          status: cobrancaMock.status || "Pendente",
-          formaPagamento: cobrancaMock.formaPagamento || "Aguardando pagamento",
-          dataPagamento: cobrancaMock.dataPagamento || "",
-          origemPagamento: cobrancaMock.origemPagamento || "Automático",
-          observacao: cobrancaMock.observacao || "",
-        });
-      } else {
-        setExisteDados(false);
-      }
+    if (!cobrancaEncontrada) {
+      setExisteDados(false);
+      setLoading(false);
+      return;
     }
+
+    const inquilinoEncontrado = listaInquilinos.find(
+      (inquilino: any) =>
+        String(inquilino.id) === String(cobrancaEncontrada.inquilinoId)
+    );
+
+    setFormData({
+      ...dadosIniciais,
+
+      nome: inquilinoEncontrado?.nome || "",
+      cpf: inquilinoEncontrado?.cpf || "",
+      imovel: inquilinoEncontrado?.imovel || "",
+      inquilinoId: cobrancaEncontrada.inquilinoId || "",
+
+      referencia: cobrancaEncontrada.referencia || "",
+      aluguel: String(cobrancaEncontrada.aluguel ?? ""),
+      agua: String(cobrancaEncontrada.agua ?? ""),
+      luz: String(cobrancaEncontrada.luz ?? ""),
+      iptu: String(cobrancaEncontrada.iptu ?? ""),
+      vencimento: cobrancaEncontrada.vencimento || "",
+      status: cobrancaEncontrada.status || "Pendente",
+      formaPagamento:
+        cobrancaEncontrada.formaPagamento || "Aguardando pagamento",
+      dataPagamento: cobrancaEncontrada.dataPagamento || "",
+      origemPagamento: cobrancaEncontrada.origemPagamento || "Automático",
+      observacao: cobrancaEncontrada.observacao || "",
+
+      plataformaPagamento: cobrancaEncontrada.plataformaPagamento || "Asaas",
+      statusAsaas: cobrancaEncontrada.statusAsaas || "Aguardando geração",
+      linkPagamento: cobrancaEncontrada.linkPagamento || "",
+      pixCopiaCola: cobrancaEncontrada.pixCopiaCola || "",
+      boletoLinhaDigitavel: cobrancaEncontrada.boletoLinhaDigitavel || "",
+      boletoUrl: cobrancaEncontrada.boletoUrl || "",
+      dataEnvioWhatsapp: cobrancaEncontrada.dataEnvioWhatsapp || "",
+    });
+
     setLoading(false);
   }, [id]);
 
@@ -70,17 +125,56 @@ export default function EditarCobranca() {
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "status") {
+      setFormData((prev) => ({
+        ...prev,
+        status: value,
+        dataPagamento:
+          value === "Paga" && !prev.dataPagamento
+            ? dataHojeInput()
+            : prev.dataPagamento,
+        formaPagamento:
+          value === "Paga" && prev.formaPagamento === "Aguardando pagamento"
+            ? "Pix"
+            : prev.formaPagamento,
+      }));
+
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleOrigemPagamentoChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const origem = e.target.value;
+
     setFormData((prev) => ({
       ...prev,
       origemPagamento: origem,
       formaPagamento: origem === "Manual" ? "Dinheiro" : "Aguardando pagamento",
-      dataPagamento: origem === "Manual" ? prev.dataPagamento : "",
+      dataPagamento:
+        origem === "Manual" && prev.status === "Paga" && !prev.dataPagamento
+          ? dataHojeInput()
+          : origem === "Manual"
+            ? prev.dataPagamento
+            : prev.dataPagamento,
     }));
+  };
+
+  const handleCopiar = (texto: string, mensagemSucesso: string) => {
+    if (!texto) {
+      alert("Ainda não existe informação para copiar.");
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(texto)
+      .then(() => alert(mensagemSucesso))
+      .catch(() => alert(texto));
   };
 
   const subtotal = calcularSubtotal(formData);
@@ -90,30 +184,64 @@ export default function EditarCobranca() {
   const handleSalvar = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const cobrancasSalvas = JSON.parse(localStorage.getItem("cobrancas_db") || "{}");
-    
-    cobrancasSalvas[id!] = {
-      ...formData,
-      id,
-      subtotal,
-      multaAutomatica,
-      total,
-    };
+    const listaCobrancas = carregarCobrancas();
 
-    localStorage.setItem("cobrancas_db", JSON.stringify(cobrancasSalvas));
+    const cobrancasAtualizadas = listaCobrancas.map((cobranca: any) => {
+      if (String(cobranca.id) !== String(id)) return cobranca;
+
+      return {
+        ...cobranca,
+        referencia: formData.referencia,
+        aluguel: Number(formData.aluguel) || 0,
+        agua: Number(formData.agua) || 0,
+        luz: Number(formData.luz) || 0,
+        iptu: Number(formData.iptu) || 0,
+        vencimento: formData.vencimento,
+        status: formData.status,
+        formaPagamento: formData.formaPagamento,
+        dataPagamento:
+          formData.status === "Paga" && !formData.dataPagamento
+            ? dataHojeInput()
+            : formData.dataPagamento,
+        origemPagamento: formData.origemPagamento,
+        observacao: formData.observacao,
+
+        plataformaPagamento: formData.plataformaPagamento,
+        statusAsaas: formData.statusAsaas,
+        linkPagamento: formData.linkPagamento,
+        pixCopiaCola: formData.pixCopiaCola,
+        boletoLinhaDigitavel: formData.boletoLinhaDigitavel,
+        boletoUrl: formData.boletoUrl,
+        dataEnvioWhatsapp: formData.dataEnvioWhatsapp,
+
+        subtotal,
+        multaAutomatica,
+        total,
+      };
+    });
+
+    localStorage.setItem(
+      COBRANCAS_STORAGE_KEY,
+      JSON.stringify(cobrancasAtualizadas)
+    );
 
     alert("Cobrança atualizada com sucesso!");
     navigate("/cobrancas");
   };
 
   if (loading) {
-    return <div className={styles.containerEditar}><h1>Carregando dados...</h1></div>;
+    return (
+      <div className={styles.containerEditar}>
+        <h1>Carregando dados...</h1>
+      </div>
+    );
   }
 
   if (!existeDados) {
     return (
       <div className={styles.containerEditar}>
         <h1>Cobrança não encontrada</h1>
+
         <Link to="/cobrancas" className={styles.voltarLink}>
           Voltar para cobranças
         </Link>
@@ -128,7 +256,9 @@ export default function EditarCobranca() {
           <Link to="/cobrancas" className={styles.voltarLink}>
             ← Voltar para cobranças
           </Link>
+
           <h1 className={styles.tituloEditar}>Editar Cobrança</h1>
+
           <p className={styles.subtituloEditar}>
             Atualize os valores, vencimento e status desta cobrança específica.
           </p>
@@ -137,10 +267,11 @@ export default function EditarCobranca() {
 
       <div className={styles.avisoEdicao}>
         <h3>Atenção</h3>
+
         <p>
           Pix e boleto devem ser confirmados automaticamente pelo sistema. Use a
           edição manual apenas para corrigir valores, ajustar status ou registrar
-          pagamentos feitos por fora, como dinheiro.
+          pagamentos feitos por fora.
         </p>
       </div>
 
@@ -153,7 +284,6 @@ export default function EditarCobranca() {
               <label className={styles.labelForm}>Inquilino</label>
               <input
                 type="text"
-                name="nome"
                 className={`${styles.inputForm} ${styles.inputBloqueado}`}
                 value={formData.nome}
                 disabled
@@ -164,7 +294,6 @@ export default function EditarCobranca() {
               <label className={styles.labelForm}>CPF</label>
               <input
                 type="text"
-                name="cpf"
                 className={`${styles.inputForm} ${styles.inputBloqueado}`}
                 value={formData.cpf}
                 disabled
@@ -175,7 +304,6 @@ export default function EditarCobranca() {
               <label className={styles.labelForm}>Imóvel</label>
               <input
                 type="text"
-                name="imovel"
                 className={`${styles.inputForm} ${styles.inputBloqueado}`}
                 value={formData.imovel}
                 disabled
@@ -217,14 +345,10 @@ export default function EditarCobranca() {
               <label className={styles.labelForm}>Aluguel base</label>
               <input
                 type="number"
-                name="aluguel"
                 className={`${styles.inputForm} ${styles.inputBloqueado}`}
                 value={formData.aluguel}
                 disabled
               />
-              <span className={styles.campoAjuda}>
-                Valor vindo do contrato. Para alterar o aluguel futuro, edite o inquilino/contrato.
-              </span>
             </div>
 
             <div className={styles.campoGrupo}>
@@ -292,15 +416,145 @@ export default function EditarCobranca() {
         </section>
 
         <section className={styles.section}>
+          <h2 className={styles.secaoTitulo}>Pagamento automático</h2>
+
+          <div className={styles.asaasInfo}>
+            <div>
+              <h3>Integração com Asaas</h3>
+              <p>
+                Futuramente, o back-end vai gerar Pix, boleto ou link de
+                pagamento pelo Asaas. Quando o inquilino pagar, o webhook
+                atualizará esta cobrança automaticamente.
+              </p>
+            </div>
+
+            <div className={styles.asaasStatus}>
+              <span>Plataforma</span>
+              <strong>{formData.plataformaPagamento}</strong>
+            </div>
+
+            <div className={styles.asaasStatus}>
+              <span>Status no Asaas</span>
+              <strong>{formData.statusAsaas}</strong>
+            </div>
+          </div>
+
+          <div className={styles.gridCampos}>
+            <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
+              <label className={styles.labelForm}>Link de pagamento</label>
+
+              <div className={styles.campoComBotao}>
+                <input
+                  type="text"
+                  name="linkPagamento"
+                  className={styles.inputForm}
+                  value={formData.linkPagamento}
+                  onChange={handleChange}
+                  placeholder="Será preenchido pelo back-end"
+                />
+
+                <button
+                  type="button"
+                  className={styles.botaoCopiar}
+                  onClick={() =>
+                    handleCopiar(
+                      formData.linkPagamento,
+                      "Link de pagamento copiado."
+                    )
+                  }
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
+              <label className={styles.labelForm}>Pix copia e cola</label>
+
+              <div className={styles.campoComBotao}>
+                <input
+                  type="text"
+                  name="pixCopiaCola"
+                  className={styles.inputForm}
+                  value={formData.pixCopiaCola}
+                  onChange={handleChange}
+                  placeholder="Será preenchido pelo Asaas"
+                />
+
+                <button
+                  type="button"
+                  className={styles.botaoCopiar}
+                  onClick={() =>
+                    handleCopiar(formData.pixCopiaCola, "Pix copiado.")
+                  }
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            <div className={`${styles.campoGrupo} ${styles.campoFull}`}>
+              <label className={styles.labelForm}>Linha digitável</label>
+
+              <div className={styles.campoComBotao}>
+                <input
+                  type="text"
+                  name="boletoLinhaDigitavel"
+                  className={styles.inputForm}
+                  value={formData.boletoLinhaDigitavel}
+                  onChange={handleChange}
+                  placeholder="Será preenchida pelo Asaas"
+                />
+
+                <button
+                  type="button"
+                  className={styles.botaoCopiar}
+                  onClick={() =>
+                    handleCopiar(
+                      formData.boletoLinhaDigitavel,
+                      "Linha digitável copiada."
+                    )
+                  }
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            <div className={styles.campoGrupo}>
+              <label className={styles.labelForm}>URL do boleto</label>
+              <input
+                type="text"
+                name="boletoUrl"
+                className={styles.inputForm}
+                value={formData.boletoUrl}
+                onChange={handleChange}
+                placeholder="Link do boleto"
+              />
+            </div>
+
+            <div className={styles.campoGrupo}>
+              <label className={styles.labelForm}>Envio no WhatsApp</label>
+              <input
+                type="date"
+                name="dataEnvioWhatsapp"
+                className={styles.inputForm}
+                value={formData.dataEnvioWhatsapp}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.section}>
           <h2 className={styles.secaoTitulo}>Pagamento</h2>
 
           <div className={styles.pagamentoInfo}>
             <div className={styles.pagamentoTexto}>
               <h3>Confirmação automática</h3>
               <p>
-                Quando o inquilino pagar por Pix ou boleto, o sistema deverá
-                atualizar esta cobrança automaticamente. O registro manual deve
-                ser usado apenas para pagamentos por fora ou adjustments internos.
+                Pagamentos por Pix ou boleto devem ser confirmados pelo sistema.
+                Use registro manual apenas para pagamentos por fora.
               </p>
             </div>
 
@@ -335,7 +589,9 @@ export default function EditarCobranca() {
               >
                 {formData.origemPagamento === "Automático" ? (
                   <>
-                    <option value="Aguardando pagamento">Aguardando pagamento</option>
+                    <option value="Aguardando pagamento">
+                      Aguardando pagamento
+                    </option>
                     <option value="Pix">Pix</option>
                     <option value="Boleto">Boleto</option>
                   </>
@@ -347,12 +603,6 @@ export default function EditarCobranca() {
                   </>
                 )}
               </select>
-
-              {formData.origemPagamento === "Automático" && (
-                <span className={styles.campoAjuda}>
-                  Em pagamentos automáticos, a forma será preenchida pelo sistema após a confirmação.
-                </span>
-              )}
             </div>
 
             <div className={styles.campoGrupo}>
@@ -365,17 +615,13 @@ export default function EditarCobranca() {
                 onChange={handleChange}
                 disabled={formData.origemPagamento === "Automático"}
               />
-              {formData.origemPagamento === "Automático" && (
-                <span className={styles.campoAjuda}>
-                  A data será preenchida automaticamente após o pagamento.
-                </span>
-              )}
             </div>
           </div>
         </section>
 
         <section className={styles.section}>
           <h2 className={styles.secaoTitulo}>Resumo atualizado</h2>
+
           <div className={styles.resumoGrid}>
             <div className={styles.resumoCard}>
               <span>Subtotal</span>
@@ -403,10 +649,11 @@ export default function EditarCobranca() {
           <button
             type="button"
             className={styles.botaoVoltar}
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/cobrancas")}
           >
             Cancelar
           </button>
+
           <button type="submit" className={styles.botaoSalvar}>
             Salvar alterações
           </button>

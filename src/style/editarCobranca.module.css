@@ -151,6 +151,85 @@
   line-height: 1.4;
 }
 
+/* ASAAS / PAGAMENTO AUTOMÁTICO */
+
+.asaasInfo {
+  background-color: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px 220px;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.asaasInfo h3 {
+  color: #111827;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.asaasInfo p {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.asaasStatus {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.asaasStatus span {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.asaasStatus strong {
+  display: block;
+  color: #4f46e5;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.campoComBotao {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.campoComBotao .inputForm {
+  flex: 1;
+}
+
+.botaoCopiar {
+  height: 48px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.botaoCopiar:hover {
+  background-color: #f8fafc;
+}
+
+/* PAGAMENTO */
+
 .pagamentoInfo {
   background-color: #f8fafc;
   border: 1px solid #e5e7eb;
@@ -285,6 +364,10 @@
   .resumoGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .asaasInfo {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* TABLET */
@@ -311,6 +394,15 @@
 
   .pagamentoStatus {
     min-width: 0;
+    width: 100%;
+  }
+
+  .campoComBotao {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .botaoCopiar {
     width: 100%;
   }
 }
@@ -396,6 +488,7 @@
 
   .avisoEdicao p,
   .pagamentoTexto p,
+  .asaasInfo p,
   .campoAjuda {
     font-size: 13px;
   }

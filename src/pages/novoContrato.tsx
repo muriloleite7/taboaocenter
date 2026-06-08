@@ -255,7 +255,7 @@ export default function NovoContrato() {
           <button
             type="button"
             className={styles.botaoVoltar}
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/contratos")}
           >
             Cancelar
           </button>
